@@ -1,65 +1,67 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <math.h>
 
-typedef struct Point {
-    long long x, y;
-} Point;
+int tile = 1;
 
-long long compare(const void *a, const void *b) {
-    Point *p1 = (Point *)a;
-    Point *p2 = (Point *)b;
-    return (p1->x - p2->x) ? (p1->x - p2->x) : (p1->y - p2->y);
-}
-
-bool ccw(Point a, Point b, Point c) {
-    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
-}
-
-long double area(Point *points, int n) {
-    long double result = 0.0;
-    for (int i = 0; i < n - 1; i++) {
-        result += (long double)(points[i].x * points[i + 1].y) - (long double)(points[i + 1].x * points[i].y);
+void fill_board(int x, int y, int l, int board[][8192], int black_x, int black_y) {
+    if (l == 1) {
+        return;
     }
-    result += (long double)(points[n - 1].x * points[0].y) - (long double)(points[0].x * points[n - 1].y);
-    return fabsl(result) / 2.0;
+    
+    int sub_l = l / 2;
+    int center_x = x + sub_l;
+    int center_y = y + sub_l;
+    
+    if (black_x < center_x && black_y < center_y) {
+        fill_board(x, y, sub_l, board, black_x, black_y);
+    } else {
+        board[center_y - 1][center_x - 1] = tile;
+        fill_board(x, y, sub_l, board, center_x - 1, center_y - 1);
+    }
+    
+    if (black_x >= center_x && black_y < center_y) {
+        fill_board(center_x, y, sub_l, board, black_x, black_y);
+    } else {
+        board[center_y - 1][center_x] = tile;
+        fill_board(center_x, y, sub_l, board, center_x, center_y - 1);
+    }
+    
+    if (black_x < center_x && black_y >= center_y) {
+        fill_board(x, center_y, sub_l, board, black_x, black_y);
+    } else {
+        board[center_y][center_x - 1] = tile;
+        fill_board(x, center_y, sub_l, board, center_x - 1, center_y);
+    }
+    
+    if (black_x >= center_x && black_y >= center_y) {
+        fill_board(center_x, center_y, sub_l, board, black_x, black_y);
+    } else {
+        board[center_y][center_x] = tile;
+        fill_board(center_x, center_y, sub_l, board, center_x, center_y);
+    }
+    
+    tile++;
 }
 
 int main() {
-    int n;
-    scanf("%d", &n);
-
-    Point points[n];
-    for (int i = 0; i < n; i++) {
-        scanf("%lld %lld", &points[i].x, &points[i].y);
-    }
-
-    qsort(points, n, sizeof(Point), compare);
-
-    Point hull[2 * n];
-    int k = 0;
-
-    for (int i = 0; i < n; i++) {
-        while (k >= 2 && !ccw(hull[k - 2], hull[k - 1], points[i])) {
-            k--;
+    int n, l;
+    scanf("%d %d", &n, &l);
+    
+    int board[8192][8192] = {0};
+    
+    int black_x, black_y;
+    scanf("%d %d", &black_x, &black_y);
+    board[black_y][black_x] = 0;
+    
+    fill_board(0, 0, l, board, black_x, black_y);
+    
+    for (int i = 0; i < l; i++) {
+        for (int j = 0; j < l; j++) {
+            printf("%d ", board[i][j]);
         }
-        hull[k++] = points[i];
+        printf("\n");
     }
-
-    for (int i = n - 1, t = k + 1; i > 0; i--) {
-        while (k >= t && !ccw(hull[k - 2], hull[k - 1], points[i - 1])) {
-            k--;
-        }
-        hull[k++] = points[i - 1];
-    }
-
-    long double calculated_area = area(hull, k - 1);
-    if (calculated_area - (long long)calculated_area > 0) {
-        printf("%.1Lf\n", calculated_area);
-    } else {
-        printf("%lld\n", (long long)calculated_area);
-    }
-
+    
     return 0;
 }
+
