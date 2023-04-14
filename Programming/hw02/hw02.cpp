@@ -1,115 +1,388 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <algorithm>
+#include <string>
 #include <cmath>
+#include <algorithm>
 
-using namespace std;
+// Entity Types
+enum EntityType
+{
+    MONSTER = 0,
+    MY_HERO = 1,
+    OPPONENT_HERO = 2
+};
 
-class Base
+enum ActionType
+{
+    WAIT,
+    MOVE,
+    SPELL_WIND,
+    SPELL_SHIELD,
+    SPELL_CONTROL
+};
+
+class GameState
 {
 public:
-    int x, y, health;
+    std::vector<Hero> myHeroes;
+    std::vector<Hero> opponentHeroes;
+    std::vector<Monster> monsters;
+    int myBaseHealth;
+    int opponentBaseHealth;
 
-    Base(int x, int y, int health) : x(x), y(y), health(health) {}
+    GameState(/* Other parameters, if needed */)
+    {
+        // Initialize heroes, monsters, and base health
+        // ...
+    }
+};
+
+class Action
+{
+public:
+    ActionType actionType;
+    int heroId;
+    int x, y;
+    int targetId;
+
+    Action(ActionType actionType, int heroId, int x = 0, int y = 0, int targetId = -1)
+        : actionType(actionType), heroId(heroId), x(x), y(y), targetId(targetId) {}
+};
+
+// Entity class
+class Entity
+{
+public:
+    int id, type, x, y, shieldLife, isControlled, health, vx, vy, nearBase, threatFor;
+    Entity(int id, int type, int x, int y, int shieldLife, int isControlled, int health, int vx, int vy, int nearBase, int threatFor)
+        : id(id), type(type), x(x), y(y), shieldLife(shieldLife), isControlled(isControlled), health(health), vx(vx), vy(vy), nearBase(nearBase), threatFor(threatFor) {}
 };
 
 class Hero
 {
 public:
-    int id, x, y;
-
-    Hero(int id, int x, int y) : id(id), x(x), y(y) {}
+    int id;
+    Hero(int id) : id(id) {}
+    void wait()
+    {
+        std::cout << "WAIT" << std::endl;
+    }
+    void move(int x, int y)
+    {
+        std::cout << "MOVE " << x << " " << y << std::endl;
+    }
+    void castWind(int x, int y)
+    {
+        std::cout << "SPELL WIND " << x << " " << y << std::endl;
+    }
+    void castShield(int entityId)
+    {
+        std::cout << "SPELL SHIELD " << entityId << std::endl;
+    }
+    void castControl(int entityId, int x, int y)
+    {
+        std::cout << "SPELL CONTROL " << entityId << " " << x << " " << y << std::endl;
+    }
 };
 
 class Monster
 {
 public:
-    int id, x, y, health, vx, vy, near_base, threat_for;
+    int id;
+    int x, y;
+    int health;
+    int vx, vy;
 
-    Monster(int id, int x, int y, int health, int vx, int vy, int near_base, int threat_for)
-        : id(id), x(x), y(y), health(health), vx(vx), vy(vy), near_base(near_base), threat_for(threat_for) {}
+    Monster(int id, int x, int y, int health, int vx, int vy)
+        : id(id), x(x), y(y), health(health), vx(vx), vy(vy) {}
 };
 
-double distance(int x1, int y1, int x2, int y2)
+class Target
 {
-    return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
-}
+public:
+    int id;
+    double priority;
 
-Monster *find_nearest_monster(vector<Monster> &monsters, Hero &hero)
+    Target(int id, double priority) : id(id), priority(priority) {}
+};
+
+class Node
 {
-    Monster *nearest_monster = nullptr;
-    double min_distance = 1e9;
+public:
+    Node *parent;
+    std::vector<Node *> children;
+    Action action;
+    int visits;
+    double totalValue;
 
-    for (auto &monster : monsters)
+    Node(Node *parent, const Action &action)
+        : parent(parent), action(action), visits(0), totalValue(0) {}
+
+    // TODO: Implement addChild, selectBestChild, updateValue methods
+};
+
+std::vector<Action> generateLegalActions(const GameState &gameState, const Hero &hero)
+{
+    std::vector<Action> legalActions;
+
+    // Generate WAIT action
+    legalActions.emplace_back(ActionType::WAIT, hero.id);
+
+    // Generate MOVE actions (in this example, we use a fixed step size)
+    const int stepSize = 400;
+    for (int x = hero.x - stepSize; x <= hero.x + stepSize; x += stepSize)
     {
-        if (monster.threat_for == 1)
+        for (int y = hero.y - stepSize; y <= hero.y + stepSize; y += stepSize)
         {
-            double dist = distance(hero.x, hero.y, monster.x, monster.y);
-            if (dist < min_distance)
-            {
-                min_distance = dist;
-                nearest_monster = &monster;
-            }
+            legalActions.emplace_back(ActionType::MOVE, hero.id, x, y);
         }
     }
 
-    return nearest_monster;
+    // Generate SPELL actions
+    // TODO: Check spell-specific conditions (e.g., mana, cooldowns)
+    // WIND spell
+    for (const auto &target : gameState.monsters)
+    {
+        legalActions.emplace_back(ActionType::SPELL_WIND, hero.id, target.x, target.y);
+    }
+    for (const auto &target : gameState.myHeroes)
+    {
+        legalActions.emplace_back(ActionType::SPELL_SHIELD, hero.id, -1, -1, target.id);
+    }
+    // CONTROL spell
+    for (const auto &target : gameState.opponentHeroes)
+    {
+        legalActions.emplace_back(ActionType::SPELL_CONTROL, hero.id, target.x, target.y, target.id);
+    }
+
+    return legalActions;
+}
+
+GameState applyAction(const GameState &gameState, const Action &action)
+{
+    GameState newGameState = gameState;
+    // TODO: Apply the action to the gameState and return the resulting gameState
+    // ...
+}
+
+double evaluateGameState(const GameState &gameState)
+{
+    // TODO: Evaluate the gameState and return its value
+    // ...
+}
+
+Action MCTS(const GameState &rootGameState, int iterations)
+{
+    Node *rootNode = new Node(nullptr, / dummy action / Action{});
+    for (int i = 0; i < iterations; ++i)
+    {
+        // Selection
+        Node *currentNode = rootNode;
+        while (!currentNode->children.empty())
+        {
+            currentNode = currentNode->selectBestChild();
+        }
+
+        // Expansion
+        std::vector<Action> legalActions = generateLegalActions(currentNode->gameState);
+        for (const Action &action : legalActions)
+        {
+            GameState childGameState = applyAction(currentNode->gameState, action);
+            Node *childNode = new Node(currentNode, action);
+            currentNode->addChild(childNode);
+        }
+
+        // Simulation
+        Node *randomChild = currentNode->children[rand() % currentNode->children.size()];
+        double value = evaluateGameState(randomChild->gameState);
+
+        // Backpropagation
+        while (randomChild != nullptr)
+        {
+            randomChild->updateValue(value);
+            randomChild = randomChild->parent;
+        }
+    }
+
+    // Choose the best action
+    Action bestAction = rootNode->selectBestChild()->action;
+    delete rootNode;
+    return bestAction;
+}
+
+bool compareTargets(const Target &a, const Target &b)
+{
+    return a.priority > b.priority;
+}
+
+double distance(int x1, int y1, int x2, int y2)
+{
+    return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
 }
 
 int main()
 {
-    int base_x, base_y;
-    cin >> base_x >> base_y;
-    cin.ignore();
-    int heroes_per_player;
-    cin >> heroes_per_player;
-    cin.ignore();
+    int baseX, baseY, heroesPerPlayer;
+    std::cin >> baseX >> baseY >> heroesPerPlayer;
 
-    while (1)
+    std::vector<Hero> myHeroes;
+    for (int i = 0; i < heroesPerPlayer; ++i)
     {
-        vector<Base> bases;
-        for (int i = 0; i < 2; i++)
-        {
-            int health, mana;
-            cin >> health >> mana;
-            cin.ignore();
-            bases.emplace_back(i == 0 ? base_x : 17630 - base_x, i == 0 ? base_y : 9000 - base_y, health);
-        }
-
-        int entity_count;
-        cin >> entity_count;
-        cin.ignore();
-
-        vector<Hero> heroes;
-        vector<Monster> monsters;
-        for (int i = 0; i < entity_count; i++)
-        {
-            int id, type, x, y, shield_life, is_controlled, health, vx, vy, near_base, threat_for;
-            cin >> id >> type >> x >> y >> shield_life >> is_controlled >> health >> vx >> vy >> near_base >> threat_for;
-            cin.ignore();
-
-            if (type == 1)
-            {
-                heroes.emplace_back(id, x, y);
-            }
-            else if (type == 0)
-            {
-                monsters.emplace_back(id, x, y, health, vx, vy, near_base, threat_for);
-            }
-        }
-
-        for (auto &hero : heroes)
-        {
-            Monster *nearest_monster = find_nearest_monster(monsters, hero);
-            if (nearest_monster)
-            {
-                cout << "MOVE " << nearest_monster->x << " " << nearest_monster->y << endl;
-            }
-            else
-            {
-                cout << "WAIT" << endl;
-            }
-        }
+        myHeroes.emplace_back(i);
     }
+
+    while (true)
+    {
+        int baseHealth, mana, entityCount;
+        std::cin >> baseHealth >> mana >> entityCount;
+
+        std::vector<Entity> entities;
+        for (int i = 0; i < entityCount; ++i)
+        {
+            int id, type, x, y, shieldLife, isControlled, health, vx, vy, nearBase, threatFor;
+            std::cin >> id >> type >> x >> y >> shieldLife >> isControlled >> health >> vx >> vy >> nearBase >> threatFor;
+            entities.emplace_back(id, type, x, y, shieldLife, isControlled, health, vx, vy, nearBase, threatFor);
+        }
+
+        // Process the game state and decide
+        // actions for your heroes
+
+        // Example: Move all heroes towards the center of the map
+        for (Hero &hero : myHeroes)
+        {
+            hero.move(17630 / 2, 9000 / 2);
+        }
+
+        std::vector<Target> targets;
+        for (const Entity &entity : entities)
+        {
+            if (entity.type == MONSTER)
+            {
+                double priority = (entity.health * 1000.0) / distance(entity.x, entity.y, baseX, baseY);
+                targets.emplace_back(entity.id, priority);
+            }
+        }
+
+        // 2. Move heroes
+        std::sort(targets.begin(), targets.end(), compareTargets);
+        for (Hero &hero : myHeroes)
+        {
+            bool targetFound = false;
+            for (const Target &target : targets)
+            {
+                auto it = std::find_if(entities.begin(), entities.end(), [&](const Entity &e)
+                                       { return e.id == target.id; });
+                if (it != entities.end())
+                {
+                    double distToTarget = distance(hero.id, it->x, it->y);
+                    if (distToTarget < 800)
+                    {
+                        hero.move(it->x, it->y);
+                        targetFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!targetFound)
+            {
+                hero.move(17630 / 2, 9000 / 2);
+            }
+        }
+
+        // 3. Use spells
+        for (Hero &hero : myHeroes)
+        {
+            // Check if enough mana to cast spells
+            if (mana >= 10)
+            {
+                // Find closest monster to base
+                int closestMonsterId = -1;
+                double minDistance = std::numeric_limits<double>::max();
+
+                for (const Entity &entity : entities)
+                {
+                    if (entity.type == MONSTER)
+                    {
+                        double distToBase = distance(entity.x, entity.y, baseX, baseY);
+                        if (distToBase < minDistance)
+                        {
+                            minDistance = distToBase;
+                            closestMonsterId = entity.id;
+                        }
+                    }
+                }
+
+                if (closestMonsterId != -1)
+                {
+                    // Cast WIND spell to push away the closest monster
+                    auto it = std::find_if(entities.begin(), entities.end(), [&](const Entity &e)
+                                           { return e.id == closestMonsterId; });
+                    if (it != entities.end() && distance(hero.x, hero.y, it->x, it->y) <= 1280)
+                    {
+                        hero.castWind(it->x, it->y);
+                        mana -= 10;
+                    }
+                }
+
+                // Cast SHIELD on heroes with low health
+                if (mana >= 10)
+                {
+                    for (Hero &heroToShield : myHeroes)
+                    {
+                        if (heroToShield.health < 10 && distance(hero.x, hero.y, heroToShield.x, heroToShield.y) <= 2200)
+                        {
+                            hero.castShield(heroToShield.id);
+                            mana -= 10;
+                            break;
+                        }
+                    }
+                }
+                // Cast CONTROL on enemy heroes
+                if (mana >= 10)
+                {
+                    for (const Entity &entity : entities)
+                    {
+                        if (entity.type == OPPONENT_HERO && distance(hero.x, hero.y, entity.x, entity.y) <= 2200)
+                        {
+                            // Move enemy hero away from the center
+                            hero.castControl(entity.id, entity.x - 1000, entity.y);
+                            mana -= 10;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 4. Optimize hero actions
+            for (Hero &hero : myHeroes)
+            {
+                Action bestAction = MCTS(gameState, /*iterations*/ 1000);
+
+                switch (bestAction.actionType)
+                {
+                case WAIT:
+                    std::cout << "WAIT" << std::endl;
+                    break;
+                case MOVE:
+                    std::cout << "MOVE " << bestAction.x << "" << bestAction.y << std::endl;
+                    break;
+                case SPELL_WIND:
+                    std::cout << "SPELL WIND " << bestAction.x << " " << bestAction.y << std::endl;
+                    break;
+                case SPELL_SHIELD:
+                    std::cout << "SPELL SHIELD " << bestAction.targetId << std::endl;
+                    break;
+                case SPELL_CONTROL:
+                    std::cout << "SPELL CONTROL " << bestAction.targetId << " " << bestAction.x << " " << bestAction.y << std::endl;
+                    break;
+                default:
+                    std::cout << "WAIT" << std::endl;
+                }
+            }
+        }
+        // TODO: Further optimize hero actions based on the current game state and remaining base health
+    }
+
+    return 0;
 }

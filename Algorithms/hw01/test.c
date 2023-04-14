@@ -1,67 +1,111 @@
-#include <stdio.h>
-#include <math.h>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <string>
 
-int tile = 1;
+using namespace std;
 
-void fill_board(int x, int y, int l, int board[][8192], int black_x, int black_y) {
-    if (l == 1) {
-        return;
+class Entity {
+public:
+    int id;
+    int x, y;
+
+    Entity(int id, int x, int y) : id(id), x(x), y(y) {}
+
+    double distanceTo(Entity &other) {
+        return sqrt(pow(x - other.x, 2) + pow(y - other.y, 2));
     }
-    
-    int sub_l = l / 2;
-    int center_x = x + sub_l;
-    int center_y = y + sub_l;
-    
-    if (black_x < center_x && black_y < center_y) {
-        fill_board(x, y, sub_l, board, black_x, black_y);
-    } else {
-        board[center_y - 1][center_x - 1] = tile;
-        fill_board(x, y, sub_l, board, center_x - 1, center_y - 1);
+};
+
+class Base : public Entity {
+public:
+    int health;
+
+    Base(int id, int x, int y, int health) : Entity(id, x, y), health(health) {}
+};
+
+class Hero : public Entity {
+public:
+    int mana;
+
+    Hero(int id, int x, int y) : Entity(id, x, y), mana(0) {}
+
+    void castSpell(const string &spellCommand) {
+        cout << spellCommand << endl;
     }
-    
-    if (black_x >= center_x && black_y < center_y) {
-        fill_board(center_x, y, sub_l, board, black_x, black_y);
-    } else {
-        board[center_y - 1][center_x] = tile;
-        fill_board(center_x, y, sub_l, board, center_x, center_y - 1);
+};
+
+class Monster : public Entity {
+public:
+    int health;
+    int vx, vy;
+    bool targetingBase;
+
+    Monster(int id, int x, int y, int health, int vx, int vy, bool targetingBase)
+        : Entity(id, x, y), health(health), vx(vx), vy(vy), targetingBase(targetingBase) {}
+};
+
+class Spell {
+public:
+    virtual void apply(Entity &caster, Entity &target) = 0;
+};
+
+class Wind : public Spell {
+public:
+    void apply(Entity &caster, Entity &target) override {
+        // Apply the push effect to the target
     }
-    
-    if (black_x < center_x && black_y >= center_y) {
-        fill_board(x, center_y, sub_l, board, black_x, black_y);
-    } else {
-        board[center_y][center_x - 1] = tile;
-        fill_board(x, center_y, sub_l, board, center_x - 1, center_y);
+};
+
+class Shield : public Spell {
+public:
+    void apply(Entity &caster, Entity &target) override {
+        // Apply the shield effect to the target
     }
-    
-    if (black_x >= center_x && black_y >= center_y) {
-        fill_board(center_x, center_y, sub_l, board, black_x, black_y);
-    } else {
-        board[center_y][center_x] = tile;
-        fill_board(center_x, center_y, sub_l, board, center_x, center_y);
+};
+
+class Control : public Spell {
+public:
+    void apply(Entity &caster, Entity &target) override {
+        // Apply the control effect to the target
     }
-    
-    tile++;
+};
+
+// Function to parse game state and update data structures
+void parseGameState(vector<Hero> &heroes, vector<Monster> &monsters) {
+    // Read game state from input and update heroes and monsters
+}
+
+// Function to decide hero actions based on game state
+void makeHeroActions(const vector<Hero> &heroes, const vector<Monster> &monsters) {
+    // Implement hero behavior according to new rules, including spell commands (WIND, SHIELD, CONTROL)
+    for (const Hero &hero : heroes) {
+        // Decide hero action (WAIT, MOVE, SPELL)
+    }
 }
 
 int main() {
-    int n, l;
-    scanf("%d %d", &n, &l);
-    
-    int board[8192][8192] = {0};
-    
-    int black_x, black_y;
-    scanf("%d %d", &black_x, &black_y);
-    board[black_y][black_x] = 0;
-    
-    fill_board(0, 0, l, board, black_x, black_y);
-    
-    for (int i = 0; i < l; i++) {
-        for (int j = 0; j < l; j++) {
-            printf("%d ", board[i][j]);
+    // Initialization and input handling
+    int baseX, baseY;
+    int heroesPerPlayer;
+    cin >> baseX >> baseY >> heroesPerPlayer;
+
+    vector<Hero> heroes;
+    vector<Monster> monsters;
+
+    while (true) {
+        // Read and parse the game state
+        parseGameState(heroes, monsters);
+
+        // Make hero actions based on game state
+        makeHeroActions(heroes, monsters);
+
+        // Output actions for each hero
+        for (const Hero &hero : heroes) {
+            // Example: output WAIT for all heroes
+            cout << "WAIT" << endl;
         }
-        printf("\n");
     }
-    
+
     return 0;
 }
-
