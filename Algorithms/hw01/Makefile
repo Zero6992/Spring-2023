@@ -10,4 +10,4 @@ $(TARGET): test.c
 clean:
 	rm -f $(TARGET)
 
-# ./check_ans /Users/zero6992/Documents/Spring-2023/Algorithms/hw01/hw0103.c
+# ./check_ans /home/zero/Documents/Algo/test.c

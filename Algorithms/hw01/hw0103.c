@@ -1,72 +1,91 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int board[8192][8192];
-int tile = 1;
+int id = 1;
 
-void fill_board(int x, int y, int size, int bx, int by) {
-    if (size == 2) {
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2; j++) {
-                if (x + i != bx || y + j != by) {
-                    board[x + i][y + j] = tile;
+void cover_board(int x, int y, int size, int tx, int ty, int **board)
+{
+    if (size == 2)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (x + i != tx || y + j != ty)
+                {
+                    board[x + i][y + j] = id;
                 }
             }
         }
-        tile++;
+        id++;
         return;
     }
 
-    int half = size / 2;
+    int t = size / 2;
+    int offsetX[4] = {0, t, 0, t};
+    int offsetY[4] = {0, 0, t, t};
 
-    if (bx < x + half && by < y + half) {
-        fill_board(x, y, half, bx, by);
-    } else {
-        board[x + half - 1][y + half - 1] = tile;
-        fill_board(x, y, half, x + half - 1, y + half - 1);
+    for (int i = 0; i < 4; i++)
+    {
+        int newX = x + offsetX[i];
+        int newY = y + offsetY[i];
+
+        if (tx >= newX && tx < newX + t && ty >= newY && ty < newY + t)
+        {
+            cover_board(newX, newY, t, tx, ty, board);
+        }
+        else
+        {
+            int cx = newX + t - 1;
+            int cy = newY + t - 1;
+            board[cx][cy] = id;
+            cover_board(newX, newY, t, cx, cy, board);
+        }
     }
-
-    if (bx < x + half && by >= y + half) {
-        fill_board(x, y + half, half, bx, by);
-    } else {
-        board[x + half - 1][y + half] = tile;
-        fill_board(x, y + half, half, x + half - 1, y + half);
-    }
-
-    if (bx >= x + half && by < y + half) {
-        fill_board(x + half, y, half, bx, by);
-    } else {
-        board[x + half][y + half - 1] = tile;
-        fill_board(x + half, y, half, x + half, y + half - 1);
-    }
-
-    if (bx >= x + half && by >= y + half) {
-        fill_board(x + half, y + half, half, bx, by);
-    } else {
-        board[x + half][y + half] = tile;
-        fill_board(x + half, y + half, half, x + half, y + half);
-    }
-
-    tile++;
+    id++;
 }
 
-int main() {
-    int n, l;
-    scanf("%d%d", &n, &l);
+int main()
+{
+    int N, L;
+    scanf("%d%d", &N, &L);
 
-    int x, y;
-    for (int i = 0; i < n; i++) {
+    int **board = (int **)malloc(sizeof(int *) * L);
+    for (int i = 0; i < L; i++)
+    {
+        board[i] = (int *)malloc(sizeof(int) * L);
+        for (int j = 0; j < L; j++)
+        {
+            board[i][j] = 0;
+        }
+    }
+    for (int i = 0; i < N; i++)
+    {
+        int x, y;
         scanf("%d%d", &x, &y);
-        board[x][y] = -1;
+        board[x][y] = 0;
     }
 
-    fill_board(0, 0, l, x, y);
+    cover_board(0, 0, L, 0, 0, board);
 
-    for (int i = 0; i < l; i++) {
-        for (int j = 0; j < l; j++) {
-            printf("%d ", board[i][j] == -1 ? 0 : board[i][j]);
+    for (int i = 0; i < L; i++)
+    {
+        for (int j = 0; j < L; j++)
+        {
+            printf("%d", board[i][j]);
+            if (j < L - 1)
+            {
+                printf(" ");
+            }
         }
         printf("\n");
     }
+
+    for (int i = 0; i < L; i++)
+    {
+        free(board[i]);
+    }
+    free(board);
 
     return 0;
 }
