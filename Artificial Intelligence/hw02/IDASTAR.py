@@ -4,6 +4,7 @@ import os
 
 sys.setrecursionlimit(10000)
 
+
 def read_input(file_path):
     with open(file_path, 'r') as f:
         return list(map(int, f.read().strip().split()))

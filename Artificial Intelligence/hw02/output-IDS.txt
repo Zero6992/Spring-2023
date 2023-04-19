@@ -1,8 +1,16 @@
 ----- input1.txt -----
-Total run time = 0.000133 seconds
-An optimal solution has 4 moves:
-1 2 3 4
+Total run time = 2.773651 seconds
+An optimal solution has 8 moves:
+5 2 2 3 4 5 6 7
 ----- input2.txt -----
-Total run time = 0.000166 seconds
-An optimal solution has 3 moves:
-2 2 3
+Total run time = 3.247244 seconds
+An optimal solution has 8 moves:
+5 2 2 3 4 5 6 7
+----- input3.txt -----
+Total run time = 0.001000 seconds
+An optimal solution has 5 moves:
+6 2 4 3 2
+----- input4.txt -----
+Total run time = 43.241839 seconds
+An optimal solution has 9 moves:
+5 2 2 3 4 5 6 7 8
