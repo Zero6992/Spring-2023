@@ -1,0 +1,54 @@
+Consider the following question: What are good algorithms that can handle this?
+
+482 Question: BST
+description
+
+In Data Structure, we learned about binary search tree. For every parent node, those left nodes are smaller than the parent node and the right nodes are larger than it.
+
+We define that the Maximum Path of a BST is a path from root node to one of leaf nodes and the sum of nodes on path is maximum.
+
+Given a sequence 2 6 7 15 16 18 23, it can build many kinds of Binary Search Tree. 
+
+The given tree is looks like this:    15 -> 6, 15 -> 18, 6 -> 2, 6 -> 7, 18 -> 16, 18 -> 23
+
+In below example, the Maximum Path is 15 -> 18 -> 23 = 56.
+
+Another Binary Search Tree's 16 -> 7, 16 -> 18, 7 -> 6, 7 -> 15, 18 -> 23, 6 -> 2
+
+Maximum Path is 16 -> 18 -> 23 = 57.
+
+
+Please find minimum of Maximum Path among all possible Binary Search Tree.
+
+Input:
+
+The first line contains a integer N, indicating the number of integers. The second line contains N integers ai.
+• 1≤ N ≤ 400
+• 0 ≤ ai ≤ 10^9
+Subtask1
+• 1≤ N ≤5
+• 0 ≤ ai ≤ 100
+Subtask2
+• 1 ≤ N ≤ 10
+• 0≤ ai ≤ 10000
+Subtask3
+• No other restriction
+
+Output
+Please find minimum of Maximum Path among all possible Binary Search Tree.
+
+example 1:
+
+Input:
+3
+1 2 3
+Output:
+5
+
+example 2:
+
+Input:
+7
+2 6 7 15 16 18 23
+Output:
+49

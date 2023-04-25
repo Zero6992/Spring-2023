@@ -1,0 +1,42 @@
+Please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
+
+description
+Carol is a foodie and today she visits a restaurant called NTNU CSIE. This restaurant is quite unique, as the owner only accepts specific coins that are powers of 2, such as 20 representing a coin worth 1, 21 representing a coin worth 2,22 representing a coin worth 4, and so on. For example: If the total amount is 5 dollars, then Carol has four ways to pay:
+1. 1 + 1 + 1+1+1=5
+2. 1+1 +1 + 2 = 5
+3. 1+2 + 2 = 5
+4. 1+ 4 = 5
+Please help Carol calculate how many possible ways she can pay.
+
+Input
+A single line with a single integer, N. For all test data, it is guaranteed:
+1 ≤ N ≤ 107
+Subtask1
+• 1 ≤ N ≤ 20
+Subtask2
+• 1≤ N ≤ 106
+Subtask3
+• No other restrictions.
+
+Output
+Output how many possible ways there are to make up the given amount. Since the number may be huge, you only need to answer the number module 1000000007(109 +7)
+
+example 1
+Input:
+5
+Output:
+4
+
+example 2
+Input:
+10
+Output:
+14
+
+example 3
+Input:
+100
+Output:
+9828
+
+Now implement it with C code
