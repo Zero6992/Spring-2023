@@ -1,0 +1,88 @@
+Consider the following question，What are some good algorithms that can handle this below question? Just describe your strategy, don't write the code yet
+
+484 - Speaker Diarization
+description
+"Speaker diarization" is a research topic that aims to determine "who speaks when" in a single audio file, analyzing the spoken content of specific speakers at particular times. This technology can be applied to analyze recordings of court proceedings, meetings, interviews, and group discussions, and it can significantly reduce human labor and convert audio information into easily summarizable data.
+
+Corgi is a student who is studying Speaker diarization as his research topic, and he is about to give a midterm presentation recently. Unfortunately, he was too focused on exploring the gaming world previously, so he needs your help to complete the following tasks.
+
+Given an audio file analyzed by a speaker diarization model, the following chart will be generated.
+
+https://i.imgur.com/BCKi6sj.png
+
+The above chart illustrates the diarization result of an audio file from 600 seconds to 660 seconds. Each color represents a speaker, and each segment represents the time interval when the speaker of that color was speaking.
+
+Speaker diarization annotates the segments of each speaker in an audio file. When combined with Automatic Speech Recognition (ASR), a transcription with speaker labels can be generated. However, conventional ASR models fail to recognize the speech content of multiple speakers talking simultaneously. To solve this issue, Corgi wants to select several speaker segments after diarization, divide them into independent audio files, and perform ASR to reduce errors. After some reasoning, Corgi found that by selecting as few segments as possible and trying to make at least one speaker speaking at each time frame, the "main speaker" segments at each time frame can be selected, effectively reducing the error rate of ASR.
+
+Although overlapping segments still exist using this segmentation method, it allows the ASR model to focus on recognizing the speech content of the main speaker, and the context can also assist the ASR model in processing overlapping speech.
+
+The figure below shows the segmentation method for the diarization results described above.
+
+https://i.imgur.com/bTjGAV3.png
+
+In the above segmentation example, you cannot add any arbitrary segment as it violates the "Select as few segments as possible" rule. Furthermore, you cannot remove any selected segments as it would violate the "Try to make at least one speaker speaking at each time frame" rule.
+
+Given the speaker diarization results of an audio file, please help Corgi find the minimum number of audio segments and the total duration of time without any speakers speaking. Make sure you have following the strategy Corgi just mentions.
+
+
+Input
+
+The first line contains two integers N, L separated by spaces. N represents the number of the segments and I represents the total time length of the audio. The time frame starts at 0(s). The following i-th lines contains two integers a, b separated by spaces, representing the start and end time of i-th segment.
+For all test data, it is guaranteed:
+• 1 ≤ N ≤ 10^6
+• 0 ≤ L ≤ 10^9
+• 0 ≤ a ≤ b ≤ L
+Subtask1(40%)
+• 1 ≤ N ≤ 20
+Subtask2(30%)
+• 1 ≤ N ≤ 10^4
+Subtask3(30%)
+No other restriction.
+
+Outpuut
+Print the minimum number of audio segments and the total duration of time without any speakers speaking, followed by a newline character. Separate two answers by a space.
+
+
+example 1
+
+Input
+3 10
+2 3
+1 7
+5 10
+
+Output
+2 1
+
+example 2
+
+Input
+1 50
+0 1
+
+Output
+1 49
+
+example 3
+
+Input
+11 100
+0 20
+5 10
+17 30
+25 60
+35 40
+37 40
+45 55
+80 90
+90 100
+96 97
+98 100
+
+Output
+5 20
+
+
+follow up:
+question 1:the code optimized greedy approach with a priority queue is great strategy, but is still incorrect in example 3 , example 2 and example 1 is correct, can you fix it?
+question 2: The program logic is correct, but in some extreme cases, the space complexity is too high and may fail the testing. Can you reduce the space complexity？
