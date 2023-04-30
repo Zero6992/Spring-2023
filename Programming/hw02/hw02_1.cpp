@@ -1,7 +1,7 @@
 #include <iostream>
+#include <list>
 #include <vector>
 #include <algorithm>
-#include <list>
 #include <map>
 #include <ctime>
 #include <cmath>
@@ -420,65 +420,92 @@ ostream &operator<<(ostream &os, const action &a)
 
 int main()
 {
-    srand(time(0));
-    int base_x; 
-    int base_y;
-    cin >> base_x >> base_y; cin.ignore();
+    // Initialization
+    int base_x, base_y;
+    cin >> base_x >> base_y;
+    cin.ignore();
     Player::base_init(base_x);
+    int heroes_per_player;
+    cin >> heroes_per_player;
+    cin.ignore();
 
-    int heroes_per_player;                      
-    cin >> heroes_per_player; cin.ignore();
-
+    // Game loop
     while (1)
     {
-        cin >> Player::my_health >> Player::my_mana; cin.ignore();
-        cin >> Player::enemy_health >> Player::enemy_mana; cin.ignore();
-
+        cin >> Player::my_health >> Player::my_mana;
+        cin.ignore();
+        cin >> Player::enemy_health >> Player::enemy_mana;
+        cin.ignore();
         int entity_count;
-        cin >> entity_count; cin.ignore();
+        cin >> entity_count;
+        cin.ignore();
 
         for (int i = 0; i < entity_count; ++i)
         {
             int id, type, x, y, shield_life, is_controlled, health, vx, vy, near_base, threat_for;
-            cin >> id >> type >> x >> y >> shield_life >> is_controlled >> health >> vx >> vy >> near_base >> threat_for; cin.ignore();
+            cin >> id >> type >> x >> y >> shield_life >> is_controlled >> health >> vx >> vy >> near_base >> threat_for;
+            cin.ignore();
             Player::input(id, type, x, y, shield_life, is_controlled, health, vx, vy, near_base, threat_for);
         }
 
-        vector<action> hero_actions(3);
-
         for (int i = 0; i < 3; ++i)
         {
-            Hero current_hero = Player::my_heros[i];
-            Monsters nearest_monster = Player::find_nearest_monster(current_hero, Player::monsters);
+            action act;
+            auto &hero = Player::my_heros[i];
+            Monsters nearest_monster = Player::find_nearest_monster(hero, Player::monsters);
 
-            if (Player::canWind(current_hero, nearest_monster))
+            if (i == 0) // Hero 1: Close-range defense, shields, handles monsters closest to base
             {
-                hero_actions[i].option = "WIND";
-                hero_actions[i].pos = make_pair(nearest_monster.get_X() + nearest_monster.get_VX(), nearest_monster.get_Y() + nearest_monster.get_VY());
+
+                Monsters closest_to_base = Player::find_nearest_monster(Player::my_Base, Player::monsters);
+
+                act.option = "MOVE";
+                act.pos = make_pair(closest_to_base.get_X() + closest_to_base.get_VX(), closest_to_base.get_Y() + closest_to_base.get_VY());
             }
-            else if (Player::canControl(current_hero, nearest_monster))
+            else if (i == 1) // Hero 2: Mid-range defense, shields, wind, handles monsters closest to it
             {
-                hero_actions[i].option = "CONTROL";
-                hero_actions[i].id = nearest_monster.get_ID();
-                hero_actions[i].pos = make_pair(nearest_monster.get_X() + nearest_monster.get_VX(), nearest_monster.get_Y() + nearest_monster.get_VY());
+                if (Player::canWind(hero, nearest_monster) && (hero - nearest_monster) < 1500)
+                {
+                    act.option = "WIND";
+                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                }
+                else if (Player::canControl(hero, nearest_monster))
+                {
+                    act.option = "CONTROL";
+                    act.id = nearest_monster.get_ID();
+                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                }
+                else
+                {
+                    act.option = "MOVE";
+                    int mid_x = (((Player::my_Base.get_X() + Player::enemy_Base.get_X()) / 2) + Player::enemy_Base.get_X()) / 2;
+                    int mid_y = Player::enemy_Base.get_Y();
+                    act.pos = make_pair(mid_x, mid_y);
+                }
             }
-            else if (Player::canShield(current_hero, current_hero))
+            else if (i == 2) // Hero 3: Aggressive, moves to the middle, wind and control
             {
-                hero_actions[i].option = "SHIELD";
-                hero_actions[i].id = current_hero.get_ID();
+                if (Player::canWind(hero, nearest_monster) && (hero - nearest_monster) < 1500)
+                {
+                    act.option = "WIND";
+                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                }
+                else if (Player::canControl(hero, nearest_monster))
+                {
+                    act.option = "CONTROL";
+                    act.id = nearest_monster.get_ID();
+                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                }
+                else
+                {
+                    act.option = "MOVE";
+                    int mid_x = Player::enemy_Base.get_X();
+                    int mid_y = (((Player::my_Base.get_Y() + Player::enemy_Base.get_Y()) / 2) + Player::enemy_Base.get_Y()) / 4;
+                    act.pos = make_pair(mid_x, mid_y);
+                }
             }
-            else
-            {
-                hero_actions[i].option = "MOVE";
-                hero_actions[i].pos = make_pair(nearest_monster.get_X() + nearest_monster.get_VX(), nearest_monster.get_Y() + nearest_monster.get_VY());
-            }
+            cout << act;
         }
-
-        for (int i = 0; i < 3; ++i)
-        {
-            cout << hero_actions[i];
-        }
-
         Player::clearVector();
     }
 }
