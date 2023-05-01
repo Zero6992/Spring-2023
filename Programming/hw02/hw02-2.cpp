@@ -1,11 +1,11 @@
 #include <iostream>
-#include <list>
+#include <string>
 #include <vector>
 #include <algorithm>
-#include <map>
-#include <ctime>
 #include <cmath>
-#include <cstdlib>
+#include <limits>
+#include <map>
+#include <list>
 
 using namespace std;
 
@@ -138,12 +138,14 @@ namespace Player
     Entity my_Base;
     Entity enemy_Base;
     list<map<int, Entity>> previous_info;
-    vector<Monsters> my_monsters;
+    int clip_ = 0;
     vector<Hero> my_heros;
     vector<Hero> enemy_heros;
+    vector<Monsters> monsters;
+    vector<Monsters> my_monsters;
     vector<Monsters> enemy_monsters;
     vector<Monsters> neutral_monsters;
-    vector<Monsters> monsters;
+
     int my_health, my_mana;
     int enemy_health, enemy_mana;
     enum
@@ -284,9 +286,22 @@ namespace Player
 
         return;
     }
-    void enable_previous_info(const int &clip = 0)
+    void enable_previous_info(const int &clip = 1)
+    {
+        clip_ = clip;
+    }
+
+    void save_previous_info()
     {
         map<int, Entity> tmp_map;
+        for (auto &e : my_heros)
+        {
+            tmp_map.insert(pair<int, Entity>(e.get_ID(), e));
+        }
+        for (auto &e : enemy_heros)
+        {
+            tmp_map.insert(pair<int, Entity>(e.get_ID(), e));
+        }
         for (auto &e : my_monsters)
         {
             tmp_map.insert(pair<int, Entity>(e.get_ID(), e));
@@ -301,35 +316,39 @@ namespace Player
         }
 
         previous_info.push_front(tmp_map);
-        if (previous_info.size() > clip + 1)
+        if (previous_info.size() > clip_ + 1)
         {
             previous_info.pop_back();
         }
     }
 
-    void get_previous_info(const int &pre_num, map<int, Entity> &info)
+    map<int, Entity> get_previous_info(const int &pre_num)
     {
-        if (pre_num > previous_info.size())
+        map<int, Entity> info;
+        info.clear();
+        if (pre_num >= previous_info.size())
         {
-            cerr << "pre_num out of list's size" << endl;
-            return;
+            cerr << "Info size error! "
+                 << "pre_num: " << pre_num << ", previous info size: " << previous_info.size() << endl;
+            cerr << " => pre_num out of list's size !!!" << endl;
+            return info;
         }
         else
         {
             auto it = next(previous_info.begin(), pre_num);
             info = *it;
-            return;
+            return info;
         }
     }
 
-    void find_wind_starting_point(vector<pair<int, int>> &wind_points)
+    bool find_wind_starting_point(vector<pair<int, int>> &wind_points)
     {
         wind_points.clear();
 
         if (previous_info.size() < 1)
         {
             cerr << "Don't have enough previous info" << endl;
-            return;
+            return false;
         }
         else
         {
@@ -338,15 +357,26 @@ namespace Player
             map<int, Entity> info_0 = *it_0;
             map<int, Entity> info_1 = *it_1;
 
+            // cerr << "winded id: ";
             for (auto m : info_0)
             {
-                if (info_1.find(m.first) != info_0.end() && m.second - info_1[m.first] >= 2200)
+                if (info_1.find(m.first) != info_1.end() && m.second - info_1[m.first] >= 2000)
                 {
                     wind_points.push_back(make_pair(info_1[m.first].get_X(), info_1[m.first].get_Y()));
+                    // cerr << m.first << " ";
                 }
             }
+            // cerr<<endl;
+
+            if (wind_points.size() != 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
-        return;
     }
 
     // 輸入r
@@ -382,11 +412,57 @@ namespace Player
         }
         else
         {
-            cerr << x << " " << y << endl;
             tmp = make_pair(17639 + x, 9000 + y);
         }
         return tmp;
     }
+
+    pair<int, int> random_circle_in_x_y(int range, int input_x, int input_y)
+    {
+        int base_top_left = my_Base.get_X() == 0 ? 1 : 0;
+        int theta;
+        if (base_top_left)
+        {
+            int minValue = 0;
+            int maxValue = 90;
+            theta = rand() % (maxValue - minValue + 1) + minValue;
+        }
+        else
+        {
+            int minValue = 180;
+            int maxValue = 270;
+            theta = rand() % (maxValue - minValue + 1) + minValue;
+        }
+        auto pi = acos(-1.0);
+        // 將角度轉為弧度
+        double radian = theta * pi / 180.0;
+        // generate number between 1 and range
+        int r = rand() % range + 1;
+        int x = r * cos(radian);
+        int y = r * sin(radian);
+        pair<int, int> tmp;
+        if (base_top_left)
+        {
+            tmp = make_pair(x + input_x, y + input_y);
+        }
+        else
+        {
+            cerr << x << " " << y << endl;
+            tmp = make_pair(17639 + x + input_x, 9000 + y + input_y);
+        }
+        return tmp;
+    }
+
+    void chase_monster(Monsters M)
+    {
+        cout << "MOVE " << M.get_X() + M.get_VX() * 2 << " " << M.get_Y() + M.get_VY() * 2 << endl;
+    }
+
+    void cast_wind(int input_x, int input_y)
+    {
+        cout << "SPELL WIND " << input_x << " " << input_y << endl;
+    }
+
 };
 
 ostream &operator<<(ostream &os, const action &a)
@@ -420,91 +496,68 @@ ostream &operator<<(ostream &os, const action &a)
 
 int main()
 {
-    // Initialization
-    int base_x, base_y;
-    cin >> base_x >> base_y;
+    int baseX, baseY;
+    cin >> baseX >> baseY;
     cin.ignore();
-    Player::base_init(base_x);
-    int heroes_per_player;
-    cin >> heroes_per_player;
-    cin.ignore();
+    Player::base_init(baseX);
 
-    // Game loop
+    int heroesPerPlayer;
+    cin >> heroesPerPlayer;
+    cin.ignore();
+    int turn = 0;
     while (1)
     {
         cin >> Player::my_health >> Player::my_mana;
         cin.ignore();
         cin >> Player::enemy_health >> Player::enemy_mana;
         cin.ignore();
-        int entity_count;
-        cin >> entity_count;
+
+        int entityCount;
+        cin >> entityCount;
         cin.ignore();
 
-        for (int i = 0; i < entity_count; ++i)
+        for (int i = 0; i < entityCount; ++i)
         {
-            int id, type, x, y, shield_life, is_controlled, health, vx, vy, near_base, threat_for;
-            cin >> id >> type >> x >> y >> shield_life >> is_controlled >> health >> vx >> vy >> near_base >> threat_for;
+            int id, type, x, y, shieldLife, isControlled, health, vx, vy, nearBase, threatFor;
+            cin >> id >> type >> x >> y >> shieldLife >> isControlled >> health >> vx >> vy >> nearBase >> threatFor;
             cin.ignore();
-            Player::input(id, type, x, y, shield_life, is_controlled, health, vx, vy, near_base, threat_for);
+            Player::input(id, type, x, y, shieldLife, isControlled, health, vx, vy, nearBase, threatFor);
         }
+        int clip = 2;
+        Player::enable_previous_info(clip);
+
+        Player::sort_monsters(Player::monsters, Player::near_mybase);
 
         for (int i = 0; i < 3; ++i)
         {
-            action act;
-            auto &hero = Player::my_heros[i];
-            Monsters nearest_monster = Player::find_nearest_monster(hero, Player::monsters);
-
-            if (i == 0) // Hero 1: Close-range defense, shields, handles monsters closest to base
+            if (Player::monsters.size() > 0)
             {
-
-                Monsters closest_to_base = Player::find_nearest_monster(Player::my_Base, Player::monsters);
-
-                act.option = "MOVE";
-                act.pos = make_pair(closest_to_base.get_X() + closest_to_base.get_VX(), closest_to_base.get_Y() + closest_to_base.get_VY());
-            }
-            else if (i == 1) // Hero 2: Mid-range defense, shields, wind, handles monsters closest to it
-            {
-                if (Player::canWind(hero, nearest_monster) && (hero - nearest_monster) < 1500)
+                if (Player::monsters[0] - Player::my_Base < 4000 && Player::canWind(Player::my_heros[i], Player::monsters[0]))
                 {
-                    act.option = "WIND";
-                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
-                }
-                else if (Player::canControl(hero, nearest_monster))
-                {
-                    act.option = "CONTROL";
-                    act.id = nearest_monster.get_ID();
-                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                    Player::cast_wind(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
                 }
                 else
                 {
-                    act.option = "MOVE";
-                    int mid_x = (((Player::my_Base.get_X() + Player::enemy_Base.get_X()) / 2) + Player::enemy_Base.get_X()) / 2;
-                    int mid_y = Player::enemy_Base.get_Y();
-                    act.pos = make_pair(mid_x, mid_y);
+                    Player::chase_monster(Player::monsters[i]);
                 }
             }
-            else if (i == 2) // Hero 3: Aggressive, moves to the middle, wind and control
+            else
             {
-                if (Player::canWind(hero, nearest_monster) && (hero - nearest_monster) < 1500)
+                pair<int, int> randomPosition;
+                if (i == 0)
                 {
-                    act.option = "WIND";
-                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                    randomPosition = Player::random_pos_circle(50000);
                 }
-                else if (Player::canControl(hero, nearest_monster))
+                else if (i == 1)
                 {
-                    act.option = "CONTROL";
-                    act.id = nearest_monster.get_ID();
-                    act.pos = make_pair(Player::enemy_Base.get_X(), Player::enemy_Base.get_Y());
+                    randomPosition = Player::random_pos_circle(80000);
                 }
-                else
+                else if (i == 2)
                 {
-                    act.option = "MOVE";
-                    int mid_x = Player::enemy_Base.get_X();
-                    int mid_y = (((Player::my_Base.get_Y() + Player::enemy_Base.get_Y()) / 2) + Player::enemy_Base.get_Y()) / 4;
-                    act.pos = make_pair(mid_x, mid_y);
+                    randomPosition = Player::random_pos_circle(50000);
                 }
+                cout << "MOVE " << randomPosition.first << " " << randomPosition.second << endl;
             }
-            cout << act;
         }
         Player::clearVector();
     }
