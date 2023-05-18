@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 
@@ -67,17 +68,22 @@ def read_input(file_name):
     return board
 
 def write_output(file_name, move, points, run_time):
-    with open(file_name, 'w') as file:
+    with open(file_name, 'a') as file:
         file.write(f'{move[0]}#: {move[1]}\n')
         file.write(f'{points} points\n')
         file.write(f'Total run time = {run_time} seconds.\n')
+        file.write('------\n')
 
 def main():
-    start_time = time.time()
-    board = read_input('input.txt')
-    points, move = alpha_beta(board, 5, float('-inf'), float('inf'), True, 0)
-    run_time = time.time() - start_time
-    write_output('output.txt', move, points, run_time)
+    if os.path.exists('output.txt'):
+        with open('output.txt', 'r+') as file:
+            file.truncate(0)
+    for i in range(1, 6):
+        start_time = time.time()
+        board = read_input(f'input{i}.txt')
+        points, move = alpha_beta(board, 5, float('-inf'), float('inf'), True, 0)
+        run_time = round(time.time() - start_time, 4)
+        write_output('output.txt', move, points, run_time)
 
 if __name__ == "__main__":
     main()

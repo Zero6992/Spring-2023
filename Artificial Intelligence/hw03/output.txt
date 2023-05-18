@@ -1,3 +1,0 @@
-Row#: 1
-4 points
-Total run time = 0.66 seconds.
