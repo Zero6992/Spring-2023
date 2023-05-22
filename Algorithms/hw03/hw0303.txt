@@ -1,0 +1,122 @@
+Consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
+
+description
+One day, Jason has nightmare that he wakes up and finds part of bedroom has been burned out with lava. Fortunately, due to the slow flow of lava, Jason has some time to escape from bed to door.
+There are five types of floor in Jason's bedroom, sizing N x M. Moreover, Jason wants to know that how long he can escape from bedroom.
+
+Input:
+The first line contains two space-seperated integer N,M, which indicate the height, width of Jason bedroom. For next N×M consisting of type L,O,C floor indicates the initial status of the bedroom.
+
+For all test data, it is guaranteed:
+• type L: Lava, and there may be a lot of lava. Lava will flow out 1 unit per second(the available direction are up, left, right, and down)
+• type O: Obstalcle, where lava cannot flow, and Jason can not go through.
+• type C: Common floor, where lava can flow.
+• type B: Bed, where lava cannot flow, and exists only one time.
+• type D: Door, where lava cannot flow, and exists only one time.
+
+Please tell Jason the latest time he can escape bedroom from B to D safely.
+
+Input:
+The first line contains two space-seperated integer N, M, which indicate the height, width of Jason bedroom. For next N x M consisting of type L,O,C floor indicates the initial status of the bedroom.
+For all test data, it is guaranteed:
+
+• 1 ≤ N ≤ 10^3
+• 1 ≤ M ≤ 10^3
+• B and D are not adjacent to each other.
+• There are no infinte outcomes.
+
+
+Output:
+
+1. Jason is not limited to taking only one step per second. As long as there is a road available, he can continue moving.
+2. The output should indicate the latest time by which Jason must reach the road before it gets blocked by lava
+3. Please print a number indicating the latest time Jason can escape bedroom from B to D. If Jason cannot escape bedroom after 1 second, print −1.
+
+Example1 Input:
+3 4
+CCCD
+CCCC
+BCLC
+"""
+initial status:
+CCCD
+CCCC
+BCLC
+
+After 1 second:
+CCCD
+CCLC
+BLLL
+
+After 2 second:
+
+CCLD
+CLLL
+BLLL
+"""
+Example1 Output: 1
+
+Example2 Input:
+4 4
+CCCL
+CCCC
+CCCC
+BCDC
+"""
+initial status:
+CCCL
+CCCC
+CCCC
+BCDC
+
+After 1 second:
+CCLL
+CCCL
+CCCC
+BCDC
+
+After 2 second:
+CLLL
+CCLL
+CCCL
+BCDC
+
+After 3 second:
+LLLL
+CLLL
+CCLL
+BCDC
+
+After 4 second:
+LLLL
+LLLL
+CLLL
+BCDL
+
+After 5 second:
+LLLL
+LLLL
+LLLL
+BLDL
+
+"""
+Example2 Output: 4
+
+example 3 Input:
+2 4
+CCCD
+BCLC
+
+"""process
+initial status:
+CCCD
+BCLC
+
+After 1 second:
+CCLD
+BLLL
+
+"""
+Example3 Output: -1
+Implement it into C++ 
+

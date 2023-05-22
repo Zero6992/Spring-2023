@@ -1,0 +1,95 @@
+Please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
+
+description
+For a pair of cities, they are either directly connected or indirectly connected of network. A city u and another city v are directly connected if a cable with a symmetrical bandwidth of w is wired between them.
+
+For two cities that are not directly connected, at least one path between the two cities exists. In the current network, more than one path is possibly available for a city pair.
+
+The current network is perfectly working, while the maintenance fee of each cable is costly. Energy conservation is another concern. The energy consumption of a cable is proportional to its bandwidth. Therefore, the company has an optimization plan to reorganize the network with the policies in the following order:
+
+    1. The number of cables should be minimized without sacrificing the connectivity of the whole network. In other words, exactly one path between every city pair should be satisfied.
+    2. If there is more than one way to minimize the number of cables, the bottleneck of the whole network should be maximized. The bottleneck of a network is determined by the city pair with the narrowest bandwidth.
+    3. If there is still more than one way to meet the above two points, the total energy consumption of the network should be minimized. In other words, the sum of bandwidths of the remaining cables should be minimized.
+
+Help the telecom company to reorganize the network and show the sum of bandwidths of the cables in the final network.
+
+Input:
+The first line contains two numbers N and M, representing the number of the citys, and the number of cables, respectively.
+For next M lines, each of them contains three numbers ui, vi, wi, representing there is a cable with a symmetrical bandwidth of wi, is wired city ui, and city vi.
+No more than one cable will be available between every city pair in the current network. In addition, the bandwidths of all cables are distinct; no two cables have the same bandwidth.
+
+For all test data, it is guaranteed
+Restiction:
+• 2 ≤ N ≤ 10^3
+• 1≤ M ≤ 5 * 10^5
+• M ≥ N-1
+• 1 ≤ ui < vi ≤ N
+• 1 ≤ wi ≤ 5 * 10^5
+
+Output:
+Print a single integer indicating the sum of bandwidths of the remaining cables after reorganizing
+
+---
+example 1:
+
+Input:
+10 9
+1 2 5
+2 7 7
+7 10 11
+6 10 6
+2 8 9
+7 9 8
+5 7 4
+4 5 2
+3 5 3
+Expected Output:
+55
+
+
+example 2:
+Input:
+5 7
+1 2 5
+1 3 6
+1 4 13
+1 5 7
+2 4 12
+3 4 9
+4 5 3
+Expected Output:
+41
+
+example 3:
+Input:
+8 15
+1 2 3
+1 3 5
+2 4 7
+2 5 9
+2 7 1
+1 7 12
+4 5 8
+4 7 13
+6 8 6
+2 6 11
+3 6 2
+2 8 4
+2 3 10
+1 8 14
+1 4 15
+
+Expected Output 
+77
+
+---
+
+hint: find the bottleneck in the network
+
+Implement it in C++ 
+
+
+
+
+
+
