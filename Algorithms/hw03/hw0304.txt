@@ -1,97 +1,43 @@
 Consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
 
-description
-
-Nine-ball is a discipline of the cue sport pool. To play with the rule, players must strike the white cue ball to pocket nine colored billiard balls, hitting them in ascending numerical order. For example, if the 1 ball and the 5 ball are pocketed on the break, the order of play would be 2->3->4->6->7->8->9. Whoever pocket the nine ball first wins the game.
-Corgi, as a billiards rookie, finds the rule that only one ball can be struck at a time in 9-ball too challenging. Therefore, he came up with a new game called "Corgi-ball". The rules are described below.
-1. The game starts with a break shot, and if a ball is pocketed, the player may continue their turn. Balls pocketed on the break are excepted from the following rules.
-2. Except for the shot following the break that should strike the ball with the lowest number, the player may only strike balls that have a number higher than all of the previous pocketed balls.
-3. If there are no balls with a number higher than all of the previous pocketed balls, the player must strike the ball with the lowest number on the table.
-4. The player who pockets the last ball wins the game.
-For example, if there are nine balls on the table, a legal sequence of shots could be 1->9->2->5->8->3->4->7->6.
-
-The green circle in the diagram represents the ball that was struck in the current turn, the yellow square represents the balls that can be struck in the next turn, and the red cross represents the balls that cannot be struck in the current turn.
-
-After playing several rounds, Corgi found that the game is not exciting enough, so he made the following modifications to the rules. All balls will be renumbered, and this numbering will be applied to the original rules. For the original numbered balls arranged in ascending order, the corresponding new numbering sequence will be a non-decreasing sequence with two or more distinct numbers. Once there is only one type of numbered ball left on the table, the player who pockets the ball first wins. The following diagram shows valid and invalid ways to renumber the balls.
-
-For the first example, after the 3 ball is pocketed, since the new number of the 3 ball is 1, only the 5, 6, 7, 8, 9 balls with new numbers greater than 1 can be hit again. Therefore, a valid sequence of shots would be 3->7->4->5->9->1->6->8->2.
-
-Now, given a sequence of shots in a game of Corgi-Ball, please estimate the minimum number of new ball numbers used in this game.
-
-Input:
-The first line contains two integers N, M separated by spaces. N represents the total number of ball and M represents the number of shots in a game. The second line contains M integers s; separated by spaces, representing the sequence of shots.
-For all test data, it is guaranteed:
-
-
-Output:
-Print the minimum number of new ball numbers used in this game, followed by a newline character. 
-
-The answer is guaranteed larger than 1.
-
-我們需要最新的
-example1 Input:
-9 9
-3 7 4 5 9 1 6 8 2
-Expected output: 3
-Your Output: 4
-
-example2 Input:
-20 2
-1 3
-Expected output: 2
-Your Output: 1
-
-Output is wrong in following example input
-example3 Input:
-15 15
-2 7 8 11 15 1 3 10 13 14 4 6 12 5 9
-Expected Output: 6
-Your output: 5
-
-example4 Input;
-8 6
-7 8 1 2 3 4
-Expected output: 5
-Your output: 3
-
-Example6 Input:
-5 4
-1 5 2 3
-Expected output: 3
-Your output: 2
-
-Hint
-1. If you have a subsequence of shots that is 1->3->7, what information about new number will you get? Try to think the relation between them.
-2. Make sure the new number array is a non-decreasing sequence, which means for all the balls that are renumbered to the same number, they should not be separated by other number of ball. See the last example in above figure.
-
-Implement it with C++ 
-
-The solution to this problem is to first find the length of the longest continuous ascending sequence of numbers. The answer is either this length or this length plus one. However, you need to determine when to add one to the length
-
-
-
-
-
-
-
-Consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
-
-Description
+Description:
 This is a modified Nine-ball pool game with adjusted rules. 
 The adjusted rules are as follows
 
+RULE:
+"""
 1. All balls will be regrouped and give a group number
-2. You can only hit a ball that has a higher  group number than the previous pocketed ball's  group number.
+
+2, Make sure the ball in new group is sequential numbers without any gaps after all balls are grouped(original number of ball), which means for all the balls that are regrouped to the same group, they should not be separated by other number of ball.
+
 3. If there are no balls with a group number higher than the previous pocketed ball's  group number, the player must strike the ball with the lowest  group number on the table.
-4. The corresponding new grouping sequence will be a non-decreasing sequence with two or more distinct groups(groups name will be a number in order). 
-5.  Once there is only one  group number of ball left on the table, the player who pockets the ball first wins.
+
+4. Ensure that the group number of the ball being struck is greater than the group number of the previous pocketed ball, you can't hit a ball with same group before and after one hit
+
+For example if there are 3 group in one input, the order can be
+i.  1st group => 2nd group => 3rd group => 1st group .....
+ii. 1st group => 3rd group => 1st group ......
+
+5.  The second line which representing the sequence of shots, the ball in the continuous ascending sequence are all in different groups(This conclusion can be easily derived based on the rule.)
+
+6.  Once there is only one  group number of ball left on the table, the player who pockets the ball first wins.
+"""
+
+--------------------
 
 The following examples show how valid and invalid ways to regroup the balls.
+
+Valid Example
+"""
+1, 2, 3, 4 => 1st group
+5, 6 => 2nd group
+7, 8, 9 => 3rd group
+"""
 
 Invalid Example
 """
 1.
-1, 2, 3, 4, 5, 6, 7, 8, 9 => 1st group 
+1, 2, 3, 4, 5, 6, 7, 8, 9 => 1st group
 Why: the corresponding new grouping sequence should be a non-decreasing sequence with 2 or more distinct groups.
 2.
 1 => 1st group
@@ -100,21 +46,44 @@ Why: the corresponding new grouping sequence should be a non-decreasing sequence
 Why: the corresponding new grouping sequence should be a non-decreasing sequence
 """
 
-Valid Example
-"""
-1, 2, 3, 4 => 1st group
-5, 6 => 2nd group
-7, 8, 9 => 3rd group
-"""
-For the valid example, if the number 3 ball is first ball pocketed, since the new number of the 3 ball is 1st group, only the ball with greater grouped number can be hit: 5, 6, 7, 8, 9. Therefore, a valid sequence of shots would be like 3->7->4->5->9->1->6->8->2.
+For the valid example, if the number 3 ball is first ball pocketed, since the new number of the 3 ball is 1st group, only the ball with greater grouped number can be hit: 5, 6, 7, 8, 9. Therefore, a valid sequence of shots would be like """3(1st group)->7(3rd group)->4(1st group)->5(2nd group)->9(3rd group)->1(1st group)->6(2nd group)->8(3rd group->2(1st group)"""
 
-Now, given a sequence of shots in a game of  the modification rule, please estimate the minimum need groups used in this game.
+Now, given a sequence of shots in a game, following the modification rule, please estimate the minimum need groups used in the game.
 
 Input:
 The first line contains two integers N, M separated by spaces. N represents the total number of ball and M represents the number of shots in a game. The second line contains M integers s; separated by spaces, representing the sequence of shots.
 For all test data, it is guaranteed:
-• 2 ≤ M≤ N ≤ 10^6
+• 2 ≤ M ≤ N ≤ 10^6
 • 1 ≤ si ≤ N
 
 Output:
-In order to play in a way that satisfies the rules and given input, output the minimum groups should the balls be divided, followed by a newline character. The answer is guaranteed > 1.
+In order to play in a way that satisfies the rules and given input, output the minimum groups should the balls be divided, followed by a newline character. The answer is guaranteed > 1
+
+example1 Input:
+9 9
+3 7 4 5 9 1 6 8 2
+Expected output: 3
+
+example2 Input:
+20 2
+1 3
+Expected output: 2
+
+example3 Input:
+15 15
+2 7 8 11 15 1 3 10 13 14 4 6 12 5 9
+Expected Output: 6
+
+example4 Input;
+8 6
+7 8 1 2 3 4
+Expected output: 5
+
+Example6 Input:
+5 4
+1 5 2 3
+Expected output: 3
+
+
+
+Please check if there are any misunderstanding in the question and process the example3 for practice
