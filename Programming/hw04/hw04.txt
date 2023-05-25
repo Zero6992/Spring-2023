@@ -1,0 +1,49 @@
+Coding rule:
+
+1. Avoid Long Functions & Deep Nesting.
+2. Avoid Magic Numbers.
+3. Declare Variables as Locally as Possible.
+4. Minimize Global & Shared Data.
+5. Always Initialize Variables.
+6. Avoid Macros.
+7. Use const Proactively.
+8. Take Parameters Appropriately by Value, Pointer, or Reference.
+9. Hide Information.
+10. Know When and How to Code for Scalability.
+11. Don't Optimize Prematurely.
+12. Don't Pessimize Prematurely.
+
+Description:
+
+Write a class String to simulate std::string.
+class String
+{
+public:
+  // 1. default constructor
+  // 2. copy constructor
+  // 3. constructor with one parameter with type const char *
+  // 4. destructor
+  // 5. size()
+  // 6. c str()
+  // 7. operator []
+  // 8. operator +=
+  // 9. clear()
+  // 10. operator
+  // 11. swap()
+private:
+  char *str_ = nullptr;
+  size_t size_ = 0, capacity_ = 0;
+};
+
+// A. relational operators (<, >, <=, >=, ==, !=)
+// B. operator <<, >>
+// C. operators +=, +
+
+
+Hint:
+
+1.  We need to add \0 to the end of string when a std::string object is created/constructed.
+
+2. Remember to release the old memory when doing Copy assignment
+
+3. When leaving the if block, memory deallocation should be carried out somewhere => We need to do something not trivial when a std::string object is destructed.
