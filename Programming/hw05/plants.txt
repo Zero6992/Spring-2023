@@ -1,0 +1,4 @@
+C Mushroom $50 75 2 100
+S Hornflower $50 50 10
+B Bombflower $50 50
+H Healflower $50 50 20
