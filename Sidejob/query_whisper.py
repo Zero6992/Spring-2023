@@ -55,7 +55,7 @@ async def get_whisper_updates(tickers):
                 if context_string_data is None:
                     continue
 
-                earnings_date = datetime.datetime.strptime(context_string_data['startDate'].split('T')[0], "%Y-%m-%d")
+                earnings_date = datetime.datetime.strptime(context_string_data['startDate'], "%Y-%m-%dT%H:%M%SZ")
                 price = soup.find(id="topquote").text
                 confirmation = soup.find(id="epsconfirmed").get("class")[1]
                 state = WhisperState.Unknown
@@ -82,6 +82,6 @@ async def get_whisper_updates(tickers):
 
     with open('data.json', 'w') as f:
         json.dump(whispers, f)
-        
+
     return result
 
