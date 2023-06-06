@@ -46,10 +46,12 @@ class MyClient(discord.Client):
 
     async def send_whisper_info(self, channel, whisper):
         earnings_date = whisper.earnings_date.strftime('%Y-%m-%d')
+        earnings_post_market_sign = "⭕" if whisper.is_earnings_post_market else "❌"
         await channel.send(f"""
 ```
-current_earnings_state: {WhisperState(whisper.current_state).name}
-earnings_date: {earnings_date}
+current earnings state: {WhisperState(whisper.current_state).name}
+earnings date: {earnings_date}
+earings post market: {earnings_post_market_sign}
 ```
 """)
 
@@ -68,4 +70,4 @@ earnings_date: {earnings_date}
         await self.wait_until_ready()
 
 client = MyClient()
-client.run('')
+client.run('MTA1MDM2MjczNjE1NDAwNTU0NA.GhKuTJ.C2T3A3D8XDKcoAgAKHGqQG-7QgfVGjy_nQbH1M')

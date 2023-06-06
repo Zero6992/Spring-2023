@@ -12,12 +12,13 @@ class WhisperState(Enum):
     Confirmed = 2
 
 class Whisper:
-    def __init__(self, id, ticker, last_update, current_state, earnings_date, last_price):
+    def __init__(self, id, ticker, last_update, current_state, earnings_date, is_earnings_post_market, last_price):
         self.id = id
         self.ticker = ticker
         self.last_update = last_update
         self.current_state = current_state
         self.earnings_date = earnings_date
+        self.is_earnings_post_market = is_earnings_post_market
         self.last_price = last_price
 
 def whisper_to_dict(whisper):
@@ -27,7 +28,8 @@ def whisper_to_dict(whisper):
         'last_update': str(whisper.last_update),
         'current_state': whisper.current_state.value,
         'earnings_date': str(whisper.earnings_date),
-        'last_price': whisper.last_price[1:]
+        'earnings_post_market': whisper.is_earnings_post_market,
+        'last_price': whisper.last_price[1:],
     }
 
 async def get_whisper_updates(tickers):
@@ -55,7 +57,8 @@ async def get_whisper_updates(tickers):
                 if context_string_data is None:
                     continue
 
-                earnings_date = datetime.datetime.strptime(context_string_data['startDate'], "%Y-%m-%dT%H:%M%SZ")
+                earnings_date = datetime.datetime.strptime(context_string_data['startDate'], "%Y-%m-%dT%H:%M%SZ") - datetime.timedelta(hours = 4)
+                is_earnings_post_market =  True if earnings_date.hour < 12 else False
                 price = soup.find(id="topquote").text
                 confirmation = soup.find(id="epsconfirmed").get("class")[1]
                 state = WhisperState.Unknown
@@ -72,7 +75,7 @@ async def get_whisper_updates(tickers):
                 else:
                     id = db_whisper.get('id', 0)
 
-                whisper = Whisper(id, ticker, datetime.datetime.now(), state, earnings_date, price)
+                whisper = Whisper(id, ticker, datetime.datetime.now(), state, earnings_date, is_earnings_post_market, price)
                 whispers[ticker] = whisper_to_dict(whisper)
                 result[whisper] = db_whisper
                 whisper.last_price = whisper.last_price[1:]
