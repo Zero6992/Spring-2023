@@ -12,7 +12,6 @@ enum EntityType
     OPPONENT_HERO = 2
 };
 
-<<<<<<< Updated upstream
 enum ActionType
 {
     WAIT,
@@ -23,9 +22,6 @@ enum ActionType
 };
 
 class GameState
-=======
-class Base
->>>>>>> Stashed changes
 {
 public:
     std::vector<Hero> myHeroes;
@@ -169,7 +165,6 @@ GameState applyAction(const GameState &gameState, const Action &action)
     // ...
 }
 
-<<<<<<< Updated upstream
 double evaluateGameState(const GameState &gameState)
 {
     // TODO: Evaluate the gameState and return its value
@@ -180,20 +175,11 @@ Action MCTS(const GameState &rootGameState, int iterations)
 {
     Node *rootNode = new Node(nullptr, / dummy action / Action{});
     for (int i = 0; i < iterations; ++i)
-=======
-Monster *find_nearest_monster(const std::vector<Monster> &monsters, const Hero &hero)
-{
-    Monster *nearest_monster = nullptr;
-    double min_distance = std::numeric_limits<double>::max();
-
-    for (const auto &monster : monsters)
->>>>>>> Stashed changes
     {
         // Selection
         Node *currentNode = rootNode;
         while (!currentNode->children.empty())
         {
-<<<<<<< Updated upstream
             currentNode = currentNode->selectBestChild();
         }
 
@@ -215,14 +201,6 @@ Monster *find_nearest_monster(const std::vector<Monster> &monsters, const Hero &
         {
             randomChild->updateValue(value);
             randomChild = randomChild->parent;
-=======
-            const double dist = distance(hero.x, hero.y, monster.x, monster.y);
-            if (dist < min_distance)
-            {
-                min_distance = dist;
-                nearest_monster = const_cast<Monster *>(&monster);
-            }
->>>>>>> Stashed changes
         }
     }
 
@@ -244,7 +222,6 @@ double distance(int x1, int y1, int x2, int y2)
 
 int main()
 {
-<<<<<<< Updated upstream
     int baseX, baseY, heroesPerPlayer;
     std::cin >> baseX >> baseY >> heroesPerPlayer;
 
@@ -285,37 +262,6 @@ int main()
                 targets.emplace_back(entity.id, priority);
             }
         }
-=======
-    int base_x, base_y;
-    std::cin >> base_x >> base_y;
-    std::cin.ignore();
-    int heroes_per_player;
-    std::cin >> heroes_per_player;
-    std::cin.ignore();
-
-    while (true)
-    {
-        std::vector<Base> bases;
-        for (int i = 0; i < 2; ++i)
-        {
-            int health, mana;
-            std::cin >> health >> mana;
-            std::cin.ignore();
-            bases.emplace_back(i == 0 ? base_x : 17630 - base_x, i == 0 ? base_y : 9000 - base_y, health);
-        }
-
-        int entity_count;
-        std::cin >> entity_count;
-        std::cin.ignore();
-
-        std::vector<Hero> heroes;
-        std::vector<Monster> monsters;
-        for (int i = 0; i < entity_count; ++i)
-        {
-            int id, type, x, y, shield_life, is_controlled, health, vx, vy, near_base, threat_for;
-            std::cin >> id >> type >> x >> y >> shield_life >> is_controlled >> health >> vx >> vy >> near_base >> threat_for;
-            std::cin.ignore();
->>>>>>> Stashed changes
 
         // 2. Move heroes
         std::sort(targets.begin(), targets.end(), compareTargets);
@@ -350,7 +296,6 @@ int main()
             // Check if enough mana to cast spells
             if (mana >= 10)
             {
-<<<<<<< Updated upstream
                 // Find closest monster to base
                 int closestMonsterId = -1;
                 double minDistance = std::numeric_limits<double>::max();
@@ -434,22 +379,10 @@ int main()
                 default:
                     std::cout << "WAIT" << std::endl;
                 }
-=======
-                std::cout << "MOVE " << nearest_monster->x << " " << nearest_monster->y << std::endl;
-            }
-
-            else
-            {
-                std::cout << "WAIT" << std::endl;
->>>>>>> Stashed changes
             }
         }
         // TODO: Further optimize hero actions based on the current game state and remaining base health
     }
 
     return 0;
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
