@@ -1,0 +1,82 @@
+Please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
+
+description
+NSFW, "上班不要看" is a famous YouTube channel in Taiwan. The boss, Froggy, is not only one of the company's establisher but also a former legislator. NSFW features various well-known projects such as "返鄉專車" and "忠孝東路走九遍" However, the most famous project in recent years is the expanding "走鐘獎."
+
+One of the company's plans is to travel to every township in Taiwan. In other projects, Froggy get a title called "按讚惡鬼" while riding motorcycles and this project is named after that. Everyone starts the journey from Taipei, and the boss, Froggy, spins a roulette wheel to determine the riding partners and the next destination. The project finishes when the boss spins the wheel back to Taipei.
+
+We will provide the distances between each neighboring township and the order of Froggy's destinations. Could you please help Froggy calculate the minimum distance he needs to ride?
+
+Input:
+
+The first line contains two numbers N, M, K indicating the number of townships, the number of bidirectional roads respectively, and the number of Froggy stops.
+For next M lines, each line contains two townships' name ti, si and one number di to represent one road connecting between stops with distance di.
+For next K lines, each line contains a townships is representing the order of Froggy stops.
+For all test data, it is guaranteed:
+• 2 ≤ N ≤ 300
+• 1 ≤ M < N^2
+• 2 ≤ K ≤ 1000
+• 0 < di ≤ 1000
+• Graph are connected
+• Without self loop
+• Township name without space
+• The order of stop starts and ends are "Da'an_Taipei_City".
+
+
+Output:
+Please output the minimum distance about Froggy traveling townships.
+
+Examples:
+
+• example 1
+
+Input:
+2 2 3
+Changzhi_Pingtung_County Da’an_Taipei_City 1
+Da’an_Taipei_City Changzhi_Pingtung_County 10
+Da’an_Taipei_City
+Changzhi_Pingtung_County
+Da’an_Taipei_City
+Output:
+2
+
+• example 2
+
+Input:
+3 3 3
+North_Tainan_City Da’an_Taipei_City 4
+North_Tainan_City Shengang_Changhua_County 2
+North_Tainan_City Shengang_Changhua_County 100
+Da’an_Taipei_City
+Shengang_Changhua_County
+Da’an_Taipei_City
+Output:
+12
+
+• example 3
+Input:
+10 15 7
+Fenglin_Hualien_County Guiren_Tainan_City 2
+Tianliao_Kaohsiung_City Xikou_Chiayi_County 2
+Wandan_Pingtung_County Guiren_Tainan_City 10
+Da’an_Taipei_City Wandan_Pingtung_County 7
+Tianliao_Kaohsiung_City Liuqiu_Pingtung_County 9
+Wandan_Pingtung_County Taibao_City_Chiayi_County 9
+Guiren_Tainan_City Taibao_City_Chiayi_County 1
+Wandan_Pingtung_County Fenglin_Hualien_County 1
+Wandan_Pingtung_County Changzhi_Pingtung_County 6
+Changzhi_Pingtung_County Wandan_Pingtung_County 5
+Changzhi_Pingtung_County Wandan_Pingtung_County 10
+Wandan_Pingtung_County Fenglin_Hualien_County 10
+Xikou_Chiayi_County Wandan_Pingtung_County 9
+Xikou_Chiayi_County Liuqiu_Pingtung_County 4
+Fenglin_Hualien_County Tianliao_Kaohsiung_City 8
+Da’an_Taipei_City
+Fenglin_Hualien_County
+Liuqiu_Pingtung_County
+Guiren_Tainan_City
+Wandan_Pingtung_County
+Wandan_Pingtung_County
+Da’an_Taipei_City
+Output:
+48

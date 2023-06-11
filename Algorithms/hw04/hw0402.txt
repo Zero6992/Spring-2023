@@ -1,0 +1,66 @@
+Please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
+
+description
+Taipei City is a vibrant city with numerous hotels, including international chain brands, boutique hotels, and locally styled unique accommodations. These hotels are connected by undirected roads. Huai Hsun, who has a great curiosity about these hotels, often chooses different lodging options to experience various styles and services.
+
+Now, Huai Hsun plans to depart from a certain hotel, pass through other hotels, and ultimately reach her desired destination hotel. However, she faces a challenge as she is not very skilled in route perception, navigation, and directional sense. Therefore, she needs to rely on the success probability of each road so that she can choose the best route to increase her chances of reaching the destination.
+
+Please help Huai Hsun find the path with the maximum success probability to ensure her successful arrival at the destination.
+
+Input:
+
+
+The first line consists of n and m, where n represents the number of hotels and m represents the number of edges. The hotel numbers from 0 to n − 1 . Next, there will be m lines, each containing three numbers separated by spaces, ai, bi, pi. The first and second numbers represents a bidirectional connection between hotels ai and bi, and the third number pi represents the success probability of that road. Following that, provide the values for start and end, where start represents the departure point and end represents the destination.
+For all test data, it is guaranteed:
+• ai ≠ bi
+• 0 ≤ pi ≤ 1
+• 2 ≤ n ≤ 10^5
+• 0 ≤ ai, bi ≤ n−1
+• 1 ≤ m ≤ min(n*(n − 1) / 2, 10^5)
+• 0 ≤ start, end < n
+• There is no repeated connections.
+
+Output:
+Please output the success probability of the path with the maximum probability, rounded to the third decimal place.
+
+Examples:
+
+• example 1
+
+Input:
+3 3
+0 1 0.5
+1 2 0.5
+0 2 0.2
+0 2
+Output:
+0.250
+
+• example 2
+
+Input:
+3 1
+0 1 0.5
+0 2
+Output:
+0.000
+
+• example 3
+Input:
+7 13
+0 1 0.02
+0 3 0.15
+0 5 0.62
+0 4 0.56
+0 6 0.99
+1 3 0.52
+1 5 0.86
+1 4 1.0
+2 4 0.69
+2 5 0.63
+2 6 0.44
+2 3 0.18
+4 5 0.55
+4 3
+Output:
+0.520
