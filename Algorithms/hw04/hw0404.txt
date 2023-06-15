@@ -1,19 +1,17 @@
 Please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
 
 description:
-When Corgi was still in his high school HSNU, his computer science project was titled "Police Patrol Route Planning System - A Case Study of Da'an District, Taipei City". The research aimed to combine crime data statistics of the city and devise optimal patrol routes for various police stations in the city. The techniques applied in the project included DFS, Hamiltonian paths, Euler circuits, Route inspection problem, Floyd-Warshall, and Fleury algorithms. However, these techniques are irrelevant to the current problem, so it is not necessary to understand them :)
 
-In a parallel universe, this project was considered a breakthrough research, and police agencies in major cities began to adopt the planning methods proposed in the study. However, before implementation, they encountered the issue of personnel reassignment. After numerous simulations, the police agencies determined the number of patrol officers required for each police station. Some police stations experienced a significant reduction in personnel needs, while others faced a substantial increase. To minimize dissatisfaction among the officers due to reassignments, commissioners of each police station conducted a survey to gather data on the most preferred police station for officers to be reassigned to. Now, the police agencies want to know the minimum accumulated shortage of patrol officers across all police stations under the condition of "meeting the preferences of the reassigned officers." Please help them find the answer.
+Corgi's high school project aimed to plan optimal patrol routes for police stations based on crime statistics using various algorithms. In an alternate universe, police agencies faced personnel reassignment after adopting the planning methods, conducting surveys to match officers' preferences. The task is to find the minimum accumulated officer shortage across all stations while meeting the officers' preferences.
 
 Input:
 
-
-The first line contain an integers N, represents the number of the police stations. The second line contain N integers ai, represents the total number of patrol officers in i-th police station currently. The third line contain N integers bi, represents the required total number of patrol officers in i-th police station before the patrol plan is implemented. The following N lines represent the results of the survey. The i-th line contains N integers xij, represents the number of officers who want to be reassigned from i-th police station to j-th police station. The integer xii in i-th line is guaranteed to be 0.
+The first line contain an integers N, represents the number of the police stations. The second line contain N integers aᵢ, represents the total number of patrol officers in i-th police station currently. The third line contain N integers bᵢ, represents the required total number of patrol officers in i-th police station before the patrol plan is implemented. The following N lines represent the results of the survey. The i-th line contains N integers xᵢⱼ, represents the number of officers who want to be reassigned from i-th police station to j-th police station. The integer xᵢᵢ in i-th line is guaranteed to be 0.
 For all test data, it is guaranteed:
 • 2 ≤ N ≤ 100
-• 0 ≤ ai, bi ≤ 10^7
-• 0 ≤ xij ≤ 10^5
-• Σ xij ≤ αi
+• 0 ≤ aᵢ, bᵢ ≤ 10^7
+• 0 ≤ xᵢⱼ ≤ 10^5
+• Σ xᵢⱼ ≤ aᵢ
 
 Output:
 Print the minimum accumulated shortage described in the problem, followed by a newline character.
