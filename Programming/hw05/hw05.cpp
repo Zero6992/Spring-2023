@@ -15,6 +15,28 @@ struct Plant {
     int hp;
     int freq;
     int val;
+
+    Plant() : type(' '), name(""), cost(0), hp(0), freq(0), val(0) {}
+
+    Plant(char t, std::string n, int c, int h, int f = 0, int v = 0) : type(t), name(n), cost(c), hp(h), freq(f), val(v) {}
+};
+
+class Zombie {
+private:
+    const int id;
+
+public:
+    Zombie(int id) : id(id) {}
+
+    int getId() const {
+        return id;
+    }
+};
+
+class Land {
+public:
+    std::vector<Zombie*> zombies;
+    Plant* plant = nullptr;
 };
 
 class Game {
@@ -22,19 +44,19 @@ private:
     int numberOfLands;
     int numberOfZombies;
     std::vector<Plant> plants;
-    std::vector<int> zombieLands;
+    std::vector<Land> lands;
     int playerLand;
+    int playerMoney = 150;
 
 public:
     Game() : numberOfLands(8), numberOfZombies(3), playerLand(7) {
         loadPlants();
-        // Initialize zombie lands randomly
-        for (int i = 0; i < numberOfZombies; ++i) {
-            int land = std::rand() % numberOfLands;
-            if (land == playerLand || std::count(zombieLands.begin(), zombieLands.end(), land)) {
-                --i; // try again
-            } else {
-                zombieLands.push_back(land);
+    }
+
+    void cleanUpZombies() {
+        for (auto& land : lands) {
+            for (auto& zombie : land.zombies) {
+                delete zombie;
             }
         }
     }
@@ -43,17 +65,39 @@ public:
         printWelcome();
         configureGame();
         printRules();
-        waitForAnyKey();
-        clearConsole();
-        printGameBoard();
-        waitForPlayerChoice();
-        // Add the rest of the game loop here
+        pressAnyKeyToContinue();
+        while (true) {
+            // Add the rest of the game loop here
+            printGameBoard();
+            waitForPlayerChoice();
+            // if (isGameOver())
+            // {
+            //     break;
+            // }
+        }
     }
 
     void printWelcome() {
         std::cout << "-----------------------------" << std::endl;
         std::cout << "|     Plants vs. Zombies     |" << std::endl;
         std::cout << "-----------------------------" << std::endl;
+    }
+
+    int readIntegerInput(int min, int max, int defaultValue) {
+        std::string input;
+        std::getline(std::cin, input);
+
+        if (input.empty()) {
+            return defaultValue;
+        }
+
+        int intValue = std::stoi(input);
+
+        if (intValue < min || intValue > max) {
+            return defaultValue;
+        }
+
+        return intValue;
     }
 
     void configureGame() {
@@ -63,45 +107,21 @@ public:
         std::cout << "Number of zombies on the map (1-10, default: 3)...>";
         numberOfZombies = readIntegerInput(1, 10, 3);
 
-        // Initialize zombie lands
-        zombieLands = getRandomDistinctNumbers(numberOfZombies, numberOfLands);
-
-        for (int i = 0; i < numberOfZombies; i++) {
-            zombieLands.push_back(rand() % numberOfLands);
-        }
-
-        // Initialize player land
-        playerLand = rand() % numberOfLands;
-    }
-
-    std::vector<int> getRandomDistinctNumbers(int num, int max) {
-        std::vector<int> numbers;
-        while (numbers.size() < num) {
-            int randomNumber = rand() % max;
-            if (std::count(numbers.begin(), numbers.end(), randomNumber) == 0) {
-                numbers.push_back(randomNumber);
+        // Resize lands and clear any previous zombies
+        lands.resize(numberOfLands);
+        for (auto& land : lands) {
+            for (auto& zombie : land.zombies) {
+                delete zombie;
             }
-        }
-        return numbers;
-    }
-
-    int readIntegerInput(int min, int max, int defaultValue) {
-        std::string input;
-        std::getline(std::cin, input);
-
-        // If input is empty, use default value
-        if (input.empty()) {
-            return defaultValue;
+            land.zombies.clear();
         }
 
-        int intValue = std::stoi(input);
-
-        // If input is not valid or out of range, use default value
-        if (intValue < min || intValue > max) {
-            return defaultValue;
+        for (int i = 0; i < numberOfZombies; ++i) {
+            int landIndex = std::rand() % numberOfLands;
+            lands[landIndex].zombies.push_back(new Zombie(i));
         }
 
-        return intValue;
+        playerLand = std::rand() % numberOfLands;
     }
 
     void printRules() {
@@ -112,19 +132,6 @@ public:
         std::cout << "=============================================================================" << std::endl;
     }
 
-    void waitForAnyKey() {
-        std::cout << "Press any key to continue . . .";
-        std::cin.get();
-    }
-
-    void clearConsole() {
-        #ifdef _WIN32
-            std::system("cls");
-        #else
-            std::system("clear");
-        #endif
-    }
-
     void loadPlants() {
         std::ifstream file("plants.txt");
         std::string line;
@@ -132,19 +139,28 @@ public:
         while (std::getline(file, line)) {
             Plant plant;
             std::stringstream ss(line);
+            std::string tempCost;
 
             ss >> plant.type;
             ss >> plant.name;
-            ss >> plant.cost;
+            ss >> tempCost;
+            tempCost.erase(std::remove(tempCost.begin(), tempCost.end(), '$'), tempCost.end()); // Remove dollar sign
+            plant.cost = std::stoi(tempCost);
             ss >> plant.hp;
 
             if (plant.type == 'C') {
                 ss >> plant.freq >> plant.val;
-            } else if (plant.type == 'S') {
+            }
+            else if (plant.type == 'S') {
+                plant.freq = 0;
                 ss >> plant.val;
-            } else if (plant.type == 'B') {
+            }
+            else if (plant.type == 'B') {
+                plant.freq = 0;
                 plant.val = 50;
-            } else if (plant.type == 'H') {
+            }
+            else if (plant.type == 'H') {
+                plant.freq = 0;
                 ss >> plant.val;
             }
 
@@ -152,62 +168,75 @@ public:
         }
     }
 
-void printGameBoard() {
-    std::string spaces = "    ";
-
-    for (int i = 0; i < numberOfLands; ++i) {
-        std::cout << "[" << i << "]";
-
-        // Indicate player and zombies
-        std::string occupants(numberOfZombies + 1, ' ');  // Create enough space for player and all zombies
-        if (playerLand == i) {
-            occupants[0] = '*';
-        }
-        for (int j = 0; j < numberOfZombies; ++j) {
-            if (zombieLands[j] == i) {
-                occupants[j + 1] = '0' + j;
+    void printGameBoard() {
+        for (int i = 0; i < numberOfLands; ++i) {
+            std::cout << "[" << i << "]";
+            std::string occupants(numberOfZombies + 1, ' ');
+            if (playerLand == i) {
+                occupants[0] = '*';
+            }
+            for (int j = 0; j < numberOfZombies; ++j) {
+                auto it = std::find_if(lands[i].zombies.begin(), lands[i].zombies.end(),
+                                    [&j](const Zombie *z) { return z->getId() == j; });
+                occupants[j + 1] = (it != lands[i].zombies.end()) ? ('0' + (*it)->getId()) : ' ';
+            }
+            if (lands[i].plant != nullptr) {
+                std::cout << "{" << occupants << "}" << lands[i].plant->type << std::endl;
+            } else {
+                std::cout << "{" << occupants << "}Empty" << std::endl;
             }
         }
-        std::cout << "{" << occupants << "}Empty" << std::endl;  // Initial state is all "Empty"
-    }
-
-        // Print separator
         std::cout << "------------------------------------------------" << std::endl;
 
-        // Print zombie information
         std::cout << "Zombie information:" << std::endl;
         for (int i = 0; i < numberOfZombies; ++i) {
             std::cout << "[" << i << "] Damage: 15 HP:" << std::string(40, '*') << std::endl;
         }
         std::cout << "================================================" << std::endl;
 
-        // Print plant information
         for (int i = 0; i < int(plants.size()); ++i) {
             std::cout << "[" << i << "] " << plants[i].name << " $" << plants[i].cost << " HP: " << plants[i].hp;
             if (plants[i].type == 'C') {
                 std::cout << " - gives $" << plants[i].val << " every " << plants[i].freq << " rounds";
-            } else if (plants[i].type == 'S') {
+            }
+            else if (plants[i].type == 'S') {
                 std::cout << " - gives " << plants[i].val << " damage points";
-            } else if (plants[i].type == 'B') {
+            }
+            else if (plants[i].type == 'B') {
                 std::cout << " - gives " << plants[i].val << " damage points";
-            } else if (plants[i].type == 'H') {
+            }
+            else if (plants[i].type == 'H') {
                 std::cout << " - gives all your plants " << plants[i].val << " HP back.";
             }
             std::cout << std::endl;
         }
+        std::cout << "================================================" << std::endl;
     }
 
+    void clearConsole() {
+#ifdef _WIN32
+        std::system("cls");
+#else
+        std::system("clear");
+#endif
+    }
+
+    void pressAnyKeyToContinue() {
+        std::cout << "請按任意鍵繼續 . . .";
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        clearConsole();
+    }
+
+    // TODO: Implement this function.
     void waitForPlayerChoice() {
         std::cout << "\nplayer $150:    Enter your choice (4 to give up, default: 4)...>";
         int playerChoice = readIntegerInput(0, 4, 4);
-        // Perform the action according to playerChoice here
+        pressAnyKeyToContinue();
     }
 };
-
 
 int main() {
     Game game;
     game.start();
     return 0;
 }
-
