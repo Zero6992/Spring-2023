@@ -2,7 +2,7 @@ import json
 import discord
 from discord.ext import tasks
 from datetime import datetime
-from query_whisper import update_last_price, update_other_info, dict_to_whisper, WhisperState
+from query_whisper import update_last_price, update_other_info, WhisperState
 
 class MyClient(discord.Client):
     def __init__(self) -> None:
