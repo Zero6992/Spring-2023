@@ -1,9 +1,7 @@
-import aiohttp
-import asyncio
-import requests
-from bs4 import BeautifulSoup
-import datetime
 import json
+import datetime
+import aiohttp
+from bs4 import BeautifulSoup
 from enum import Enum
 
 class WhisperState(Enum):
@@ -32,14 +30,8 @@ def whisper_to_dict(whisper):
         'last_price': whisper.last_price[1:],
     }
 
-async def get_whisper_updates(tickers):
+async def update_last_price(tickers):
     result = {}
-    try:
-        with open('data.json', 'r') as f:
-            whispers = json.load(f)
-    except FileNotFoundError:
-        whispers = {}
-
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'}
     async with aiohttp.ClientSession() as session:
@@ -48,43 +40,96 @@ async def get_whisper_updates(tickers):
                 async with session.get(f"https://www.earningswhispers.com/stocks/{ticker}", headers=headers) as r:
                     text = await r.text()
                     soup = BeautifulSoup(text, 'html.parser')
-                context_string_data = None
-                for script in soup.find_all("script"):
-                    if "@context" in script.text:
-                        context_string_data = json.loads(script.text)
-                        break
 
-                if context_string_data is None:
-                    continue
+                    # Update last price
+                    price = soup.find(id="topquote").text[1:]  # Extract and remove dollar sign
 
-                earnings_date = datetime.datetime.strptime(context_string_data['startDate'], "%Y-%m-%dT%H:%M%SZ") - datetime.timedelta(hours = 4)
-                is_earnings_post_market =  True if earnings_date.hour < 12 else False
-                price = soup.find(id="topquote").text
-                confirmation = soup.find(id="epsconfirmed").get("class")[1]
-                state = WhisperState.Unknown
+                    # Retrieve previous whisper if it exists
+                    try:
+                        with open('data.json', 'r') as f:
+                            whispers = json.load(f)
+                    except FileNotFoundError:
+                        whispers = {}
+                    db_whisper = whispers.get(ticker, {})
 
-                if "icon-no" in confirmation:
-                    state = WhisperState.Unconfirmed
-                elif "icon-checkmark" in confirmation:
-                    state = WhisperState.Confirmed
+                    # Create/update new whisper dict
+                    whisper = {**db_whisper, 'last_update': datetime.datetime.now().isoformat(), 'last_price': price}
 
-                db_whisper = whispers.get(ticker, None)
-
-                if db_whisper is None:
-                    id = 0
-                else:
-                    id = db_whisper.get('id', 0)
-
-                whisper = Whisper(id, ticker, datetime.datetime.now(), state, earnings_date, is_earnings_post_market, price)
-                whispers[ticker] = whisper_to_dict(whisper)
-                result[whisper] = db_whisper
-                whisper.last_price = whisper.last_price[1:]
-                print(f"Updated {whisper.ticker}: {whisper.last_price}, {whisper.earnings_date}, {whisper.current_state.name}")
+                    whispers[ticker] = whisper
+                    result[ticker] = whisper
+                    print(f"Updated {ticker}: {price}")
             except Exception as e:
                 print(f"Failed to update: {ticker} - {str(e)}")
 
-    with open('data.json', 'w') as f:
-        json.dump(whispers, f)
+            with open('data.json', 'w') as f:
+                json.dump(whispers, f)
 
     return result
 
+
+async def update_other_info(tickers):
+    result = {}
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'}
+    async with aiohttp.ClientSession() as session:
+        for ticker in tickers:
+            try:
+                async with session.get(f"https://www.earningswhispers.com/stocks/{ticker}", headers=headers) as r:
+                    text = await r.text()
+                    soup = BeautifulSoup(text, 'html.parser')
+                    context_string_data = None
+                    for script in soup.find_all("script"):
+                        if "@context" in script.text:
+                            context_string_data = json.loads(script.text)
+                            break
+
+                    if context_string_data is None:
+                        continue
+
+                    earnings_date = datetime.datetime.strptime(context_string_data['startDate'], "%Y-%m-%dT%H:%M%SZ") - datetime.timedelta(hours = 4)
+                    is_earnings_post_market =  True if earnings_date.hour < 12 else False
+                    confirmation = soup.find(id="epsconfirmed").get("class")[1]
+                    state = WhisperState.Unknown.value
+
+                    if "icon-no" in confirmation:
+                        state = WhisperState.Unconfirmed.value
+                    elif "icon-checkmark" in confirmation:
+                        state = WhisperState.Confirmed.value
+
+                    # Retrieve previous whisper if it exists
+                    try:
+                        with open('data.json', 'r') as f:
+                            whispers = json.load(f)
+                    except FileNotFoundError:
+                        whispers = {}
+                    db_whisper = whispers.get(ticker, {})
+
+                    # Create/update new whisper dict
+                    whisper = {
+                        **db_whisper,
+                        'last_update': datetime.datetime.now().isoformat(),
+                        'current_state': state,
+                        'earnings_date': earnings_date.isoformat(),
+                        'earnings_post_market': is_earnings_post_market
+                    }
+                    whispers[ticker] = whisper
+                    result[ticker] = whisper
+            except Exception as e:
+                print(f"Failed to update: {ticker} - {str(e)}")
+
+            with open('data.json', 'w') as f:
+                json.dump(whispers, f)
+
+    return result
+
+
+def dict_to_whisper(whisper_dict):
+    return Whisper(
+        id=None,  # As per the updated requirements, id is not required
+        ticker=whisper_dict['ticker'],
+        last_update=datetime.datetime.strptime(whisper_dict['last_update'], "%Y-%m-%d %H:%M:%S.%f"),
+        current_state=WhisperState(whisper_dict['current_state']),
+        earnings_date=datetime.datetime.strptime(whisper_dict['earnings_date'], "%Y-%m-%d %H:%M:%S"),
+        is_earnings_post_market=whisper_dict['earnings_post_market'],
+        last_price=whisper_dict['last_price'],
+    )
