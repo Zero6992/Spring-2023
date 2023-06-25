@@ -19,17 +19,6 @@ class Whisper:
         self.is_earnings_post_market = is_earnings_post_market
         self.last_price = last_price
 
-def whisper_to_dict(whisper):
-    return {
-        'id': whisper.id,
-        'ticker': whisper.ticker,
-        'last_update': str(whisper.last_update),
-        'current_state': whisper.current_state.value,
-        'earnings_date': str(whisper.earnings_date),
-        'earnings_post_market': whisper.is_earnings_post_market,
-        'last_price': whisper.last_price[1:],
-    }
-
 async def update_last_price(tickers):
     result = {}
 
@@ -121,15 +110,3 @@ async def update_other_info(tickers):
                 json.dump(whispers, f)
 
     return result
-
-
-def dict_to_whisper(whisper_dict):
-    return Whisper(
-        id=None,  # As per the updated requirements, id is not required
-        ticker=whisper_dict['ticker'],
-        last_update=datetime.datetime.strptime(whisper_dict['last_update'], "%Y-%m-%d %H:%M:%S.%f"),
-        current_state=WhisperState(whisper_dict['current_state']),
-        earnings_date=datetime.datetime.strptime(whisper_dict['earnings_date'], "%Y-%m-%d %H:%M:%S"),
-        is_earnings_post_market=whisper_dict['earnings_post_market'],
-        last_price=whisper_dict['last_price'],
-    )
