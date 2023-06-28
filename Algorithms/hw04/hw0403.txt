@@ -1,18 +1,18 @@
 Please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
 
 description
-Vonernue, the CEO of a technology company and a professional DJ, plans to travel from Taiwan to Sweden on a business trip while maximizing the opportunity to hold parties in layover cities. Given the flight costs between cities and a discount voucher, find the minimum cost of the journey to Sweden and the maximum number of cities where parties can be held.
+A CEO of a technology company and a professional DJ, plans to travel from Taiwan to Sweden on a business trip while maximizing the opportunity to hold parties in layover cities. Given the flight costs between cities and a discount voucher, find the minimum cost of the journey to Sweden and the maximum number of cities where parties can be held.
 
 Input:
 
 The first line contains two integers N, M, separated by spaces. N represents the total number of cities, including Taiwan and Sweden. M represents the total number of possible flight between cities. The following i—th lines contain three integers uᵢ, vᵢ, wᵢ, separated by spaces. Each line represents that it costs wᵢ dollars for the flight between city uᵢ and city vᵢ. Every flight between cities is bidirectional. City 1 represents Taiwan and city N represents Sweden.
+
 For all test data, it is guaranteed:
 • 2 ≤ N ≤ 10^5
 • N−1 ≤ M ≤ min(N*(N-1)/2, 10^5)
 • 1 ≤ uᵢ, vᵢ ≤ N
 • 1 ≤ wᵢ ≤ 10^6
 • There is no repeated flight between two cities
-
 
 Output:
 Print the minimum cost of the journey from Taiwan to Sweden and the number of cities where the parties can be held, excluding Taiwan and Sweden. If there are multiple answers of the number of cities under the same cost, print the maximum one. Two outputs should be separated by space, and the whole output should be followed by a newline character. The answer is guaranteed to exist.
