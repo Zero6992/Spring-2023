@@ -1,0 +1,50 @@
+Here is the extended problem of the previous one, please first consider the following question: What are some good algorithms that can handle this? Just describe your strategy, don't write the code yet
+
+description
+Due to an unexpected increase in the number of passengers, the available flight routes changed shortly after Alan finished his arragement.
+
+Alan's country has N airports, while ROC has M airports. For simplicity, we assume that all airports in both countries are located on a pair of parallel east-west lines. Each airports is assigned a number which may be duplicated.
+
+Alan's planning strategy is the same as in pC, but instead of specifying the available routes, any airport with the same number can be used to arrange flight routes ( Domestic flights are ignored ).
+
+Again, please help Alan find the maximum number of aircraft that can take off at once.
+Input:
+The first line contains two integers N, M, which has mentioned in the description above. The second line contains N integers separated by spaces. The i-th number ai, represents the i-th airport from west to east in Alan's country is numbered as ai. The third line contains M integers separated by spaces. The i-th number, ci, represents the i-th airport from west to east in ROC is numbered as ci.
+
+For all test data, it is guaranteed:
+
+• 1 ≤ N, M ≤ 10^6
+• 1 ≤ ai, ci ≤ 10^6
+
+Output:
+Print the maximum number of aircraft that can take off at once, followed by a newline character.
+
+
+Now refer to the examples below, and implement your strategies to C
+
+Examples:
+• example 1
+
+Input:
+3 3
+1 4 2
+2 1 4
+Output:
+2
+
+• example 2
+
+Input:
+5 3
+1 2 3 4 5
+6 7 8
+Output:
+0
+
+• example 3
+Input:
+10 10
+9 11 2 8 1 7 8 10 3 9
+11 10 8 3 10 10 8 4 11 7
+Output:
+3
