@@ -9,7 +9,6 @@
 #include <random>
 #include <memory>
 
-
 struct Plant {
     char type;
     std::string name;
@@ -26,6 +25,7 @@ struct Plant {
 class Zombie {
 private:
     const int id;
+    int hp = 40; // Initial health points of each zombie.
 
 public:
     Zombie(int id) : id(id) {}
@@ -33,7 +33,17 @@ public:
     int getId() const {
         return id;
     }
+
+    int getHP() const {
+        return hp;
+    }
+
+    void takeDamage(int damage) {
+        hp -= damage;
+        if (hp < 0) hp = 0;
+    }
 };
+
 
 class Land {
 public:
@@ -64,7 +74,7 @@ public:
     void setPlayerMoney(int money) {
         playerMoney = money;
     }
-
+    
     void start() {
         printWelcome();
         configureGame();
@@ -74,8 +84,10 @@ public:
             // Add the rest of the game loop here
             printGameBoard();
             waitForPlayerChoice();
-            moveZombies();
-            movePlayer();
+            printGameBoard();
+            movePlayerZombie();
+            zombiesAttack();
+            plantsAttack();
             // if (isGameOver())
             // {
             //     break;
@@ -100,6 +112,7 @@ public:
         int intValue = std::stoi(input);
 
         if (intValue < min || intValue > max) {
+            std::cout << "Invalid input! Using default value." << std::endl;
             return defaultValue;
         }
 
@@ -193,7 +206,21 @@ public:
                 occupants[zombiePos] = '0' + zombie->getId();
             }
 
-            std::string plantInfo = (lands[i].plant != nullptr) ? std::string(1, lands[i].plant->type) : "Empty";
+            std::string plantInfo = (lands[i].plant != nullptr) ? std::string(lands[i].plant->name) : "Empty";
+            plantInfo += (lands[i].plant != nullptr) ? std::string(" HP: ") + std::to_string(lands[i].plant->hp) : "";
+
+            if (lands[i].plant != nullptr && lands[i].plant->type == 'C') {
+
+                if (lands[i].plant->freq >= 2) {
+                    plantInfo += std::string(" (") + std::to_string(lands[i].plant->freq) + std::string(" more visits)");
+                } else if (lands[i].plant->freq == 1) {
+                    plantInfo += std::string(" (") + std::to_string(lands[i].plant->freq) + std::string(" more visit)");
+                } else {
+                    plantInfo += std::string(" lands[i].plant->freq error");
+                }
+                
+            }
+
             std::cout << "{" << occupants << "}" << plantInfo << std::endl;
         }
 
@@ -201,8 +228,12 @@ public:
 
         std::cout << "Zombie information:" << std::endl;
         for (int i = 0; i < numberOfZombies; ++i) {
-            std::cout << "[" << i << "] Damage: 15 HP:" << std::string(40, '*') << std::endl;
+            if (!lands[i].zombies.empty()) { // Make sure there is a Zombie at this land
+                std::cout << "[" << i << "] Damage: 15 HP:" << std::string(lands[i].zombies[0]->getHP(), '*') << std::endl;
+            }
         }
+
+
         std::cout << "================================================" << std::endl;
 
         for (int i = 0; i < int(plants.size()); ++i) {
@@ -238,66 +269,117 @@ public:
         clearConsole();
     }
 
-    std::default_random_engine generator;
-
-    void movePlayer() {
-        std::uniform_int_distribution<int> distribution(1, 6);
-        int steps = distribution(generator);
-
-        lands[playerLand].hasPlayer = false;
-        playerLand = (playerLand + steps) % numberOfLands;
-        lands[playerLand].hasPlayer = true;
-
-    }
-
-    void moveZombies() {
-        std::vector<std::vector<std::shared_ptr<Zombie>>> newZombies(numberOfLands); // Temporary storage for moved zombies
-
-        for (int i = 0; i < numberOfLands; ++i) {
-            if (!lands[i].zombies.empty()) {
-                std::uniform_int_distribution<int> distribution(1, 3);
-                for (auto& zombie : lands[i].zombies) {
-                    int steps = distribution(generator);
-                    int newPos = (i + steps) % numberOfLands;
-                    newZombies[newPos].push_back(zombie);
-                }
-            }
-        }
-
-        for (int i = 0; i < numberOfLands; ++i) {
-            lands[i].zombies = newZombies[i];
-            for (auto& zombie : lands[i].zombies) {
-                printGameBoard(); 
-                std::cout << "Zombie [" << zombie->getId() << "] moves to land " << i << ".\n";
-                pressAnyKeyToContinue();
-            }
-        }
-        
-    }
-
-
-
     // TODO: Implement this function.
     void waitForPlayerChoice() {
         std::cout << "\nplayer $" << getPlayerMoney() << ":    Enter your choice (0-" << plants.size()-1 << " to plant, " << plants.size() << " to give up, default: " << plants.size() << ")...>";
+        
         int playerChoice = readIntegerInput(0, plants.size(), plants.size());
         if (playerChoice < plants.size()) {
             if (getPlayerMoney() < plants[playerChoice].cost) {
-                std::cout << "Not enough money to plant " << plants[playerChoice].name << std::endl;
+                std::cout << "Not enough money! Please input again!" << plants[playerChoice].name << std::endl;
+                std::cout << "\nplayer $" << getPlayerMoney() << ":    Enter your choice (0-" << plants.size()-1 << " to plant, " << plants.size() << " to give up, default: " << plants.size() << ")...>";
             } else {
                 if (lands[playerLand].plant != nullptr) {
-                    std::cout << "Land already occupied by another plant.\n";
+                    std::cout << "Land already occupied by " << plants[playerChoice].name << "! Please input again!\n";
+                    std::cout << "\nplayer $" << getPlayerMoney() << ":    Enter your choice (0-" << plants.size()-1 << " to plant, " << plants.size() << " to give up, default: " << plants.size() << ")...>";
                 } else {
                     setPlayerMoney(getPlayerMoney() - plants[playerChoice].cost);
                     lands[playerLand].plant = std::make_shared<Plant>(plants[playerChoice]);
-                    std::cout << plants[playerChoice].name << " planted successfully\n";
+                    std::cout << "You have planted " << plants[playerChoice].name << " at land " << playerLand << "!\n";
+
                 }
             }
-        }
+        } else {
+            std::cout << "You give up!" << std::endl;
+            pressAnyKeyToContinue();
+            exit(0);
+        } 
+        
+        
+        
         pressAnyKeyToContinue();
     }
 
+    void movePlayerZombie() {
+    // Create a temporary vector to hold the zombies
+        std::vector<std::shared_ptr<Zombie>> tempZombies;
+
+        for (auto& land : lands) {
+            for (auto& zombie : land.zombies) {
+                tempZombies.push_back(zombie);
+            }
+            // Clear zombies from the current land
+            land.zombies.clear();
+        }
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distr(0, numberOfLands - 1);
+
+        // Distribute the zombies randomly
+        for (auto& zombie : tempZombies) {
+            int landIndex = distr(gen);
+            lands[landIndex].zombies.push_back(zombie);
+        }
+
+        // random change the position of player
+        lands[playerLand].hasPlayer = false;
+        playerLand = distr(gen);
+        lands[playerLand].hasPlayer = true;
+
+        pressAnyKeyToContinue();
+    }
+
+    void zombiesAttack() {
+        for (auto& land : lands) {
+            if (!land.zombies.empty() && land.plant != nullptr) {
+                // Assuming each zombie deals 15 damage.
+                int totalDamage = 15 * land.zombies.size();
+                land.plant->hp -= totalDamage;
+
+                if (land.plant->hp <= 0) {
+                    land.plant.reset();
+                }
+            }
+        }
+    }
+
+    void plantsAttack() {
+        for (auto& land : lands) {
+            if (!land.zombies.empty() && land.plant != nullptr) {
+                // Using a switch statement to handle different plant types
+                switch (land.plant->type) {
+                    case 'S':  // Assuming 'S' type plant damages one zombie
+                        if (!land.zombies.empty()) {
+                            // You need to define and implement the takeDamage method for the Zombie class
+                            land.zombies[0]->takeDamage(land.plant->val);
+                            if (land.zombies[0]->getHP() <= 0) {
+                                land.zombies.erase(land.zombies.begin());
+                            }
+                        }
+                        break;
+
+                    case 'B':  // Assuming 'B' type plant damages all zombies in the land
+                        for (auto& zombie : land.zombies) {
+                            zombie->takeDamage(land.plant->val);
+                        }
+                        land.zombies.erase(std::remove_if(
+                                land.zombies.begin(), 
+                                land.zombies.end(), 
+                                [](const std::shared_ptr<Zombie>& zombie){ return zombie->getHP() <= 0; }
+                            ), land.zombies.end());
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
 };
+
+
 
 int main() {
     Game game;
